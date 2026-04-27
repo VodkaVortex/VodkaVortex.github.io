@@ -1,0 +1,32 @@
+---
+title: "Shuangning Yang"
+image: images/yangshuangning.png
+about:
+  id: hero-heading
+  template: trestles
+  image-width: 12em
+  image-shape: round
+  links:
+    - icon: mailbox
+      text: realyangshuangning@gmail.com
+      href: mailto:realyangshuangning@gmail.com
+    - icon: github
+      text: VodkaVortex
+      href: https://github.com/VodkaVortex
+    - icon: 📝
+      text: CV
+      href: CV.pdf 
+---
+
+::: {#hero-heading}
+
+## Welcome
+
+Hello, welcome
+
+
+## Background
+
+- 2020-2024: Lecturer, HFUT
+
+:::
