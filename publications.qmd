@@ -1,10 +1,127 @@
 ---
 title: "Publications"
-editor: visual
+page-layout: full
+toc: true
+toc-location: right
+toc-depth: 2
 ---
 
+::: {.callout-note appearance="minimal" icon=false}
+**\*** denotes equal contribution &nbsp;|&nbsp; **†** denotes corresponding author &nbsp;|&nbsp; <i class="bi bi-link-45deg"></i> [Google Scholar](https://scholar.google.com/) &nbsp;|&nbsp; <i class="bi bi-github"></i> [GitHub](https://github.com/VodkaVortex)
+:::
 
+## Selected Publications {.unnumbered}
 
-## Publications
+下面挑选了若干代表性工作。点击 **Details** 可以查看每篇论文的方法图、核心结论和所有资源链接。
 
--  杨浩然, **杨双宁**. IIE往事. **内部参考**, 2025, 已接受. [Link](https://)
+---
+
+### 2025 {.unnumbered}
+
+::: {.publication-card}
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
+![](images/papers/iie-teaser.png){.pub-teaser fig-align="center"}
+:::
+
+::: {.g-col-12 .g-col-md-8}
+
+#### IIE 往事 {.unnumbered}
+
+杨浩然, [**杨双宁**]{.author-self}<sup>†</sup>  
+*内部参考*, 2025 &nbsp;·&nbsp; **Accepted**
+
+[`Internal`]{.badge .bg-secondary} [`Memoir`]{.badge .bg-info}
+
+> 本文回顾了 IIE 期间的若干关键事件，从亲历者视角梳理了组织演进过程中的若干重要节点，并结合一手资料对相关讨论进行了系统化整理。
+
+<a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+<a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
+<a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-easel"></i> Slides</a>
+<a href="#" class="btn btn-outline-warning btn-sm" role="button"><i class="bi bi-quote"></i> BibTeX</a>
+<a href="#" class="btn btn-outline-info btn-sm" role="button"><i class="bi bi-link-45deg"></i> Link</a>
+
+:::
+
+::::
+
+::: {.callout-tip collapse="true" icon=false}
+## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
+
+**Method Overview**
+
+![Figure 1. 论文方法整体框架示意图。这里可以放置 method.png / pipeline.png。](images/papers/iie-method.png){#fig-iie-method width=90%}
+
+**Key Results**
+
+| 方法 (Method) | 指标 A | 指标 B | 指标 C |
+|---|:---:|:---:|:---:|
+| Baseline       | 65.2 | 42.1 | 71.3 |
+| Prior SOTA     | 72.8 | 48.5 | 76.9 |
+| **Ours**       | **78.4** | **53.7** | **82.1** |
+
+: Table 1. 在三个标准基准上的对比结果，Ours 在所有指标上取得 SOTA。{#tbl-iie-results}
+
+**Abstract**
+
+完整摘要可以放在这里。本文针对 X 问题，提出了一种基于 Y 的方法。我们的核心贡献包括：(1) 首次将 A 引入 B 任务；(2) 设计了 C 模块以缓解 D 限制；(3) 在三个主流数据集上取得 SOTA。代码与模型权重已开源。
+
+**BibTeX**
+
+```bibtex
+@article{yang2025iie,
+  title   = {IIE 往事},
+  author  = {杨浩然 and 杨双宁},
+  journal = {内部参考},
+  year    = {2025},
+  note    = {Accepted}
+}
+```
+:::
+
+:::
+
+---
+
+<!-- ============ 复制下面这一整段就可以新增一篇论文 ============ -->
+
+::: {.publication-card}
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
+![](images/yangshuangning.png){.pub-teaser fig-align="center"}
+:::
+
+::: {.g-col-12 .g-col-md-8}
+
+#### Paper Title Goes Here {.unnumbered}
+
+Author One, [**杨双宁**]{.author-self}<sup>\*</sup>, Author Three<sup>†</sup>  
+*Conference / Journal Name*, 2025 &nbsp;·&nbsp; **Under Review**
+
+[`Topic A`]{.badge .bg-primary} [`Topic B`]{.badge .bg-success}
+
+> 一句话描述（One-line takeaway）：本工作提出了 …，在 … 任务上比已有方法提升 X%。
+
+<a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+<a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
+<a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-globe"></i> Project</a>
+
+:::
+
+::::
+
+::: {.callout-tip collapse="true" icon=false}
+## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
+
+放置该论文的详细介绍、方法图、消融实验表等。
+
+:::
+
+:::
+
+---
+

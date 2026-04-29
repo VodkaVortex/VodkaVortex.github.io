@@ -39,13 +39,13 @@
     "href": "publications.html",
     "title": "Publications",
     "section": "",
-    "text": "杨浩然, 杨双宁. IIE往事. 内部参考, 2025, 已接受. Link"
+    "text": "* denotes equal contribution  |  † denotes corresponding author  |   Google Scholar  |   GitHub"
   },
   {
-    "objectID": "publications.html#publications",
-    "href": "publications.html#publications",
+    "objectID": "publications.html#selected-publications",
+    "href": "publications.html#selected-publications",
     "title": "Publications",
-    "section": "",
-    "text": "杨浩然, 杨双宁. IIE往事. 内部参考, 2025, 已接受. Link"
+    "section": "Selected Publications",
+    "text": "Selected Publications\n下面挑选了若干代表性工作。点击 Details 可以查看每篇论文的方法图、核心结论和所有资源链接。\n\n\n2025\n\n\n\n\n\n\n\n\n\n\nIIE 往事\n杨浩然, 杨双宁†\n内部参考, 2025  ·  Accepted\nInternal Memoir\n\n本文回顾了 IIE 期间的若干关键事件，从亲历者视角梳理了组织演进过程中的若干重要节点，并结合一手资料对相关讨论进行了系统化整理。\n\n PDF  Code  Slides  BibTeX  Link\n\n\n\n\n\n\n\n\nTip Details, Figures & Tables\n\n\n\n\n\nMethod Overview\n\n\n\n\n\n\nFigure 1: Figure 1. 论文方法整体框架示意图。这里可以放置 method.png / pipeline.png。\n\n\n\nKey Results\n\nTable 1. 在三个标准基准上的对比结果，Ours 在所有指标上取得 SOTA。{#tbl-iie-results}\n\n\n方法 (Method)\n指标 A\n指标 B\n指标 C\n\n\n\n\nBaseline\n65.2\n42.1\n71.3\n\n\nPrior SOTA\n72.8\n48.5\n76.9\n\n\nOurs\n78.4\n53.7\n82.1\n\n\n\nAbstract\n完整摘要可以放在这里。本文针对 X 问题，提出了一种基于 Y 的方法。我们的核心贡献包括：(1) 首次将 A 引入 B 任务；(2) 设计了 C 模块以缓解 D 限制；(3) 在三个主流数据集上取得 SOTA。代码与模型权重已开源。\nBibTeX\n@article{yang2025iie,\n  title   = {IIE 往事},\n  author  = {杨浩然 and 杨双宁},\n  journal = {内部参考},\n  year    = {2025},\n  note    = {Accepted}\n}\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPaper Title Goes Here\nAuthor One, 杨双宁*, Author Three†\nConference / Journal Name, 2025  ·  Under Review\nTopic A Topic B\n\n一句话描述（One-line takeaway）：本工作提出了 …，在 … 任务上比已有方法提升 X%。\n\n PDF  Code  Project\n\n\n\n\n\n\n\n\nTip Details, Figures & Tables\n\n\n\n\n\n放置该论文的详细介绍、方法图、消融实验表等。"
   }
 ]
