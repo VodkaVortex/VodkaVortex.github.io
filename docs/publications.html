@@ -195,7 +195,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <section id="iotbec-an-accurate-and-efficient-recurring-vulnerability-detection-framework-for-black-box-iot-devices" class="level4 unnumbered g-col-12 g-col-md-8">
 <h4 class="unnumbered anchored" data-anchor-id="iotbec-an-accurate-and-efficient-recurring-vulnerability-detection-framework-for-black-box-iot-devices">IoTBec: An Accurate and Efficient Recurring Vulnerability Detection Framework for Black Box IoT devices</h4>
-<p><span class="author-self"><strong>Author Three</strong></span> <em>NDSS</em>, 2026 &nbsp;·&nbsp; <strong>Accepted</strong></p>
+<p><span class="author-self"><strong>Third Author</strong></span> <em>NDSS</em>, 2026 &nbsp;·&nbsp; <strong>Accepted</strong></p>
 <p><a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a> <a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a> <a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-globe"></i> Project</a></p>
 </section>
 </div>
@@ -211,6 +211,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
+<p><strong>Abstract</strong></p>
+<p>The proliferation of IoT devices has driven a rise in vulnerability exploits. Existing vulnerability detection approaches heavily rely on firmware or source code for analysis. This reliance critically compromises their efficiency in real-world black-box scenarios. To address this limitation, we propose IoTBec, a novel firmware and source-code independent framework for recurring vulnerability detection. IoTBec innovatively constructs a Vulner- ability Interface Signature (VIS) based on black-box interfaces and known vulnerability information. The signature is designed to match potential recurring vulnerabilities against target de- vices. The framework then deeply integrates this signature-based detection with Large Language Model (LLM)-driven fuzzing. Upon a match, IoTBec automatically leverages LLMs to generate targeted fuzzing payloads for verification. To evaluate IoTBec, we conducted extensive experiments on devices from five major IoT vendors. Results show that IoTBec discovers over 7 times more vulnerabilities than the current state-of-the-art (SOTA) black-box fuzzing methods, with 100% precision and 93.38% recall. Overall, IoTBec detected 183 vul- nerabilities, 169 of which were assigned CVE IDs. Among these, 53 were newly discovered and had an average CVSS 3.x score of 8.61, covering buffer overflows, command injection, and CSRF issues. Notably, through LLM-driven fuzzing, IoTBec also dis- covered 25 previously unknown vulnerabilities. The experimental evidence suggests that IoTBec’s unique firmware and source- code independent paradigm enhances detection efficiency and enables the discovery of novel and variant vulnerabilities. We will release the source code for IoTBec and the experiment data at https://github.com/IoTBec.</p>
 <p><strong>Method Overview</strong></p>
 <div id="fig-iie-method" class="quarto-float quarto-figure quarto-figure-center anchored">
 <figure class="quarto-float quarto-float-fig figure">

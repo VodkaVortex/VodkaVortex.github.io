@@ -27,7 +27,7 @@ Click **Details** to view each paper’s methodology diagram, key findings, and 
 
 #### IoTBec: An Accurate and Efficient Recurring Vulnerability Detection Framework for Black Box IoT devices {.unnumbered}
 
-[**Author Three**]{.author-self}
+[**Third Author**]{.author-self}
 *NDSS*, 2026 &nbsp;·&nbsp; **Accepted**
 
 <a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
@@ -40,6 +40,12 @@ Click **Details** to view each paper’s methodology diagram, key findings, and 
 
 ::: {.callout-tip collapse="true" icon=false}
 ## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
+
+**Abstract**
+
+The proliferation of IoT devices has driven a rise in vulnerability exploits. Existing vulnerability detection approaches heavily rely on firmware or source code for analysis. This reliance critically compromises their efficiency in real-world black-box scenarios. To address this limitation, we propose IoTBec, a novel firmware and source-code independent framework for recurring vulnerability detection. IoTBec innovatively constructs a Vulner- ability Interface Signature (VIS) based on black-box interfaces and known vulnerability information. The signature is designed to match potential recurring vulnerabilities against target de- vices. The framework then deeply integrates this signature-based detection with Large Language Model (LLM)-driven fuzzing. Upon a match, IoTBec automatically leverages LLMs to generate targeted fuzzing payloads for verification.
+To evaluate IoTBec, we conducted extensive experiments on devices from five major IoT vendors. Results show that IoTBec discovers over 7 times more vulnerabilities than the current state-of-the-art (SOTA) black-box fuzzing methods, with 100% precision and 93.38% recall. Overall, IoTBec detected 183 vul- nerabilities, 169 of which were assigned CVE IDs. Among these, 53 were newly discovered and had an average CVSS 3.x score of 8.61, covering buffer overflows, command injection, and CSRF issues. Notably, through LLM-driven fuzzing, IoTBec also dis- covered 25 previously unknown vulnerabilities. The experimental evidence suggests that IoTBec’s unique firmware and source- code independent paradigm enhances detection efficiency and enables the discovery of novel and variant vulnerabilities. We will release the source code for IoTBec and the experiment data at https://github.com/IoTBec.
+
 
 **Method Overview**
 
