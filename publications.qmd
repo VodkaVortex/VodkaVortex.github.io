@@ -52,13 +52,23 @@ Click **Details** to view each paper’s methodology diagram, key findings, and 
 
 **Key Results**
 
-| 方法 (Method) | 指标 A | 指标 B | 指标 C |
-|---|:---:|:---:|:---:|
-| Baseline       | 65.2 | 42.1 | 71.3 |
-| Prior SOTA     | 72.8 | 48.5 | 76.9 |
-| **Ours**       | **78.4** | **53.7** | **82.1** |
 
-: Table 1. 在三个标准基准上的对比结果，Ours 在所有指标上取得 SOTA。{#tbl-iie-results}
+| Models | Human Judge ASR (Simple Query) | Human Judge ASR (GCG) | Human Judge ASR (AutoDAN) | Human Judge ASR (PAIR) | GPT-4 Judge ASR (Simple Query) | GPT-4 Judge ASR (GCG) | GPT-4 Judge ASR (AutoDAN) | GPT-4 Judge ASR (PAIR) |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| 7b (Base) | 8 | 77 | 84 | 82 | 34 | 54 | 90 | 87 |
+| 7b (Labeling) | 79 | 86 | 93 | 94 | 85 | 88 | 99 | 100 |
+| 7b (Feedback with PPO) | 64 | 82 | 91 | 95 | 98 | 92 | 100 | 97 |
+| 7b (Feedback with DPO) | 73 | 80 | 94 | 92 | 97 | 94 | 98 | 96 |
+| 7b (Combining with PPO) | 87 | 93 | 97 | 96 | 100 | 100 | 100 | 100 |
+| 7b (Combining with DPO) | 85 | 94 | 99 | 96 | 91 | 96 | 100 | 100 |
+| 13b (Base) | 2 | 3 | 31 | 3 | 0 | 4 | 45 | 5 |
+| 13b (Labeling) | 5 | 16 | 48 | 17 | 11 | 13 | 46 | 15 |
+| 13b (Feedback with PPO) | 4 | 14 | 55 | 24 | 12 | 12 | 59 | 27 |
+| 13b (Feedback with DPO) | 3 | 10 | 55 | 19 | 19 | 12 | 53 | 25 |
+| 13b (Combining with PPO) | 7 | 43 | 46 | 44 | 13 | 33 | 52 | 40 |
+| 13b (Combining with DPO) | 5 | 35 | 63 | 56 | 14 | 36 | 57 | 41 |
+
+: Table 1. Attack success rate (ASR) comparison across different distillation configurations under Human Judge and GPT-4 Judge evaluation. Joint knowledge combining methods (especially PPO/DPO-based combinations) substantially increase jailbreak susceptibility in both 7b and 13b models. {#tbl-asr-results}
 
 **Abstract**
 
