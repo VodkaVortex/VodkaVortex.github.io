@@ -153,12 +153,10 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 
 ::: {.g-col-12 .g-col-md-8}
 
-#### Paper Title Goes Here {.unnumbered}
+#### FirmSV: Detecting Stored Vulnerabilities in IoT Firmware using Static Taint Analysis {.unnumbered}
 
 [**Author Three**]{.author-self}
 *Conference / Journal Name*, 2025 &nbsp;·&nbsp; **Under Review**
-
-[`Topic A`]{.badge .bg-primary} [`Topic B`]{.badge .bg-success}
 
 > 一句话描述（One-line takeaway）：本工作提出了 …，在 … 任务上比已有方法提升 X%。
 
