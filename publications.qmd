@@ -193,7 +193,7 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 
 #### Paper Title Goes Here {.unnumbered}
 
-[**Author Three**]{.author-self}
+[**Third Author**]{.author-self}
 *Conference / Journal Name*, 2025 &nbsp;·&nbsp; **Under Review**
 
 [`Topic A`]{.badge .bg-primary} [`Topic B`]{.badge .bg-success}
