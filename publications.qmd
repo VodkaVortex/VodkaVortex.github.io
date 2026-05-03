@@ -68,7 +68,7 @@ Click **Details** to view each paper’s methodology diagram, key findings, and 
 | 13b (Combining with PPO) | 7 | 43 | 46 | 44 | 13 | 33 | 52 | 40 |
 | 13b (Combining with DPO) | 5 | 35 | 63 | 56 | 14 | 36 | 57 | 41 |
 
-: Table 1. Attack success rate (ASR) comparison across different distillation configurations under Human Judge and GPT-4 Judge evaluation. Joint knowledge combining methods (especially PPO/DPO-based combinations) substantially increase jailbreak susceptibility in both 7b and 13b models. {#tbl-asr-results}
+Attack success rate (ASR) comparison across different distillation configurations under Human Judge and GPT-4 Judge evaluation. Joint knowledge combining methods (especially PPO/DPO-based combinations) substantially increase jailbreak susceptibility in both 7b and 13b models. {#tbl-asr-results}
 
 **Abstract**
 
