@@ -12,7 +12,7 @@ toc-depth: 2
 
 ## Selected Publications {.unnumbered}
 
-点击 **Details** 可以查看每篇论文的方法图、核心结论和所有资源链接。
+Click **Details** to view each paper’s methodology diagram, key findings, and all related resource links.
 
 ---
 
