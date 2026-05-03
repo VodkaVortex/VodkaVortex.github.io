@@ -12,7 +12,7 @@ toc-depth: 2
 
 ## Selected Publications {.unnumbered}
 
-下面挑选了若干代表性工作。点击 **Details** 可以查看每篇论文的方法图、核心结论和所有资源链接。
+点击 **Details** 可以查看每篇论文的方法图、核心结论和所有资源链接。
 
 ---
 
@@ -32,8 +32,6 @@ toc-depth: 2
 
 [**First Author**]{.author-self} 
 *ICASSP*, 2026 &nbsp;·&nbsp; **Accepted**
-
-> 本文回顾了 IIE 期间的若干关键事件，从亲历者视角梳理了组织演进过程中的若干重要节点，并结合一手资料对相关讨论进行了系统化整理。
 
 <a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
 <a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
