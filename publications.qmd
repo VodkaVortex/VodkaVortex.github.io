@@ -6,9 +6,9 @@ toc-location: right
 toc-depth: 2
 ---
 
-::: {.callout-note appearance="minimal" icon=false}
+<!-- ::: {.callout-note appearance="minimal" icon=false}
 **\*** denotes equal contribution &nbsp;|&nbsp; **†** denotes corresponding author &nbsp;|&nbsp; <i class="bi bi-link-45deg"></i> [Google Scholar](https://scholar.google.com/) &nbsp;|&nbsp; <i class="bi bi-github"></i> [GitHub](https://github.com/VodkaVortex)
-:::
+::: -->
 
 ## Selected Publications {.unnumbered}
 
