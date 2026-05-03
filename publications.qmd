@@ -10,8 +10,6 @@ toc-depth: 2
 **\*** denotes equal contribution &nbsp;|&nbsp; **†** denotes corresponding author &nbsp;|&nbsp; <i class="bi bi-link-45deg"></i> [Google Scholar](https://scholar.google.com/) &nbsp;|&nbsp; <i class="bi bi-github"></i> [GitHub](https://github.com/VodkaVortex)
 ::: -->
 
-## Selected Publications {.unnumbered}
-
 Click **Details** to view each paper’s methodology diagram, key findings, and all related resource links.
 
 ---
@@ -98,6 +96,44 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 :::: {.grid}
 
 ::: {.g-col-12 .g-col-md-4}
+![](images/papers/IoTBec.png){.pub-teaser fig-align="center"}
+:::
+
+::: {.g-col-12 .g-col-md-8}
+
+#### IoTBec: An Accurate and Efficient Recurring Vulnerability Detection Framework for Black Box IoT devices {.unnumbered}
+
+[**Author Three**]{.author-self}
+*Conference / Journal Name*, 2025 &nbsp;·&nbsp; **Under Review**
+
+[`Topic A`]{.badge .bg-primary} [`Topic B`]{.badge .bg-success}
+
+<a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+<a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
+<a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-globe"></i> Project</a>
+
+:::
+
+::::
+
+::: {.callout-tip collapse="true" icon=false}
+## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
+
+放置该论文的详细介绍、方法图、消融实验表等。
+
+:::
+
+:::
+
+---
+
+<!-- ============ 复制下面这一整段就可以新增一篇论文 ============ -->
+
+::: {.publication-card}
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
 ![](images/yangshuangning.png){.pub-teaser fig-align="center"}
 :::
 
@@ -105,7 +141,87 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 
 #### Paper Title Goes Here {.unnumbered}
 
-Author One, [**杨双宁**]{.author-self}<sup>\*</sup>, Author Three<sup>†</sup>  
+[**Author Three**]{.author-self}
+*Conference / Journal Name*, 2025 &nbsp;·&nbsp; **Under Review**
+
+[`Topic A`]{.badge .bg-primary} [`Topic B`]{.badge .bg-success}
+
+> 一句话描述（One-line takeaway）：本工作提出了 …，在 … 任务上比已有方法提升 X%。
+
+<a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+<a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
+<a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-globe"></i> Project</a>
+
+:::
+
+::::
+
+::: {.callout-tip collapse="true" icon=false}
+## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
+
+放置该论文的详细介绍、方法图、消融实验表等。
+
+:::
+
+:::
+
+---
+
+<!-- ============ 复制下面这一整段就可以新增一篇论文 ============ -->
+
+::: {.publication-card}
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
+![](images/yangshuangning.png){.pub-teaser fig-align="center"}
+:::
+
+::: {.g-col-12 .g-col-md-8}
+
+#### Paper Title Goes Here {.unnumbered}
+
+[**Author Three**]{.author-self}
+*Conference / Journal Name*, 2025 &nbsp;·&nbsp; **Under Review**
+
+[`Topic A`]{.badge .bg-primary} [`Topic B`]{.badge .bg-success}
+
+> 一句话描述（One-line takeaway）：本工作提出了 …，在 … 任务上比已有方法提升 X%。
+
+<a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+<a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
+<a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-globe"></i> Project</a>
+
+:::
+
+::::
+
+::: {.callout-tip collapse="true" icon=false}
+## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
+
+放置该论文的详细介绍、方法图、消融实验表等。
+
+:::
+
+:::
+
+---
+
+<!-- ============ 复制下面这一整段就可以新增一篇论文 ============ -->
+
+::: {.publication-card}
+
+:::: {.grid}
+
+::: {.g-col-12 .g-col-md-4}
+![](images/yangshuangning.png){.pub-teaser fig-align="center"}
+:::
+
+::: {.g-col-12 .g-col-md-8}
+
+#### Paper Title Goes Here {.unnumbered}
+
+[**Author Three**]{.author-self}
 *Conference / Journal Name*, 2025 &nbsp;·&nbsp; **Under Review**
 
 [`Topic A`]{.badge .bg-primary} [`Topic B`]{.badge .bg-success}
