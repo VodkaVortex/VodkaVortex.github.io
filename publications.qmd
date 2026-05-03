@@ -148,7 +148,7 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 :::: {.grid}
 
 ::: {.g-col-12 .g-col-md-4}
-![](images/yangshuangning.png){.pub-teaser fig-align="center"}
+![](images/FirmSV.png){.pub-teaser fig-align="center"}
 :::
 
 ::: {.g-col-12 .g-col-md-8}
@@ -188,7 +188,7 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 :::: {.grid}
 
 ::: {.g-col-12 .g-col-md-4}
-![](images/yangshuangning.png){.pub-teaser fig-align="center"}
+![](images/){.pub-teaser fig-align="center"}
 :::
 
 ::: {.g-col-12 .g-col-md-8}
@@ -228,7 +228,7 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 :::: {.grid}
 
 ::: {.g-col-12 .g-col-md-4}
-![](images/yangshuangning.png){.pub-teaser fig-align="center"}
+![](images/){.pub-teaser fig-align="center"}
 :::
 
 ::: {.g-col-12 .g-col-md-8}
