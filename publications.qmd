@@ -148,7 +148,7 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 :::: {.grid}
 
 ::: {.g-col-12 .g-col-md-4}
-![](images/FirmSV.png){.pub-teaser fig-align="center"}
+![](images/papers/FirmSV.png){.pub-teaser fig-align="center"}
 :::
 
 ::: {.g-col-12 .g-col-md-8}
