@@ -155,6 +155,12 @@ Attack success rate (ASR) comparison across different distillation configuration
 ::::
 
 ::: {.callout-tip collapse="true" icon=false}
+## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
+
+**Abstract**
+
+The rapid proliferation of Internet of Things (IoT) devices has introduced severe security vulnerability challenges. While extensive research utilizes static taint analysis for firmware vulnerability discovery, it predominantly focuses on volatile memory, neglecting the security risks associated with configuration items in non-volatile memory (NVM). To address this gap, this paper proposes FirmSV, a taint analysis tool targeting stored vulnerabilities. FirmSV leverages static taint analysis to effectively trace interprocedural data flows originating from configuration items, enabling the detection of these vulnerabilities. Experimental results demonstrate that FirmSV successfully discovered 41 vulnerabilities in mainstream IoT firmware, 29 of which were assigned CVE IDs. FirmSV detected 6.3 times more vulnerabilities than the state-of-the-art (SOTA) tool HermeScan, validating its effectiveness in stored vulnerability detection.
+
 
 :::
 
