@@ -82,11 +82,8 @@ To evaluate IoTBec, we conducted extensive experiments on devices from five majo
 [**First Author**]{.author-self} 
 *ICASSP*, 2026 &nbsp;·&nbsp; **Accepted**
 
-<a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+<a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11462247" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
 <a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
-<a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-easel"></i> Slides</a>
-<a href="#" class="btn btn-outline-warning btn-sm" role="button"><i class="bi bi-quote"></i> BibTeX</a>
-<a href="#" class="btn btn-outline-info btn-sm" role="button"><i class="bi bi-link-45deg"></i> Link</a>
 
 :::
 
@@ -95,9 +92,16 @@ To evaluate IoTBec, we conducted extensive experiments on devices from five majo
 ::: {.callout-tip collapse="true" icon=false}
 ## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
 
+**Abstract**
+
+Knowledge distillation has significantly accelerated the devel- opment of efficient language models. With the rapid prolif- eration of these methods in the open-source communities, a systematic evaluation of their implications for model security is urgently needed. To quantify the security risks introduced by various distillation methods, we propose a general and exten- sible evaluation framework that reflects complex, real-world distillation workflows. Additionally, we analyze the impact of the distillation process on models’ tendencies toward harm- ful behavior by extending JailbreakBench with a harm-level dataset comprising 10 malicious query categories. Our results demonstrate that knowledge distillation significantly increases model vulnerability, and joint learning of the two primary forms of knowledge further exacerbates this risk. Furthermore, our analysis reveals different effects across harmful query cat- egories, with the risk levels of discrimination and economic harm showing significant increases that warrant particular at- tention.
+
 **Method Overview**
 
-![Figure 1. 论文方法整体框架示意图。这里可以放置 method.png / pipeline.png。](images/papers/KD.png){#fig-iie-method width=90%}
+(images/papers/KD.png){#fig-iie-method width=90%}
+
+A demonstration of the general ablation-based pipeline, consisting of knowledge elicitation (from GPT-4) and knowl-edge 
+transfer via labeling, feedback (RO/RL), or their combi- nation.
 
 **Key Results**
 
@@ -119,21 +123,6 @@ To evaluate IoTBec, we conducted extensive experiments on devices from five majo
 
 Attack success rate (ASR) comparison across different distillation configurations under Human Judge and GPT-4 Judge evaluation. Joint knowledge combining methods (especially PPO/DPO-based combinations) substantially increase jailbreak susceptibility in both 7b and 13b models. {#tbl-asr-results}
 
-**Abstract**
-
-Knowledge distillation has significantly accelerated the devel- opment of efficient language models. With the rapid prolif- eration of these methods in the open-source communities, a systematic evaluation of their implications for model security is urgently needed. To quantify the security risks introduced by various distillation methods, we propose a general and exten- sible evaluation framework that reflects complex, real-world distillation workflows. Additionally, we analyze the impact of the distillation process on models’ tendencies toward harm- ful behavior by extending JailbreakBench with a harm-level dataset comprising 10 malicious query categories. Our results demonstrate that knowledge distillation significantly increases model vulnerability, and joint learning of the two primary forms of knowledge further exacerbates this risk. Furthermore, our analysis reveals different effects across harmful query cat- egories, with the risk levels of discrimination and economic harm showing significant increases that warrant particular at- tention.
-
-**BibTeX**
-
-```bibtex
-@article{yang2025iie,
-  title   = {IIE 往事},
-  author  = {杨浩然 and 杨双宁},
-  journal = {内部参考},
-  year    = {2025},
-  note    = {Accepted}
-}
-```
 :::
 
 :::
@@ -154,23 +143,18 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 
 #### FirmSV: Detecting Stored Vulnerabilities in IoT Firmware using Static Taint Analysis {.unnumbered}
 
-[**Author Three**]{.author-self}
-*Conference / Journal Name*, 2025 &nbsp;·&nbsp; **Under Review**
+[**Third Author**]{.author-self}
+*CSCWD*, 2026 &nbsp;·&nbsp; **Accepted**
 
-> 一句话描述（One-line takeaway）：本工作提出了 …，在 … 任务上比已有方法提升 X%。
 
 <a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
 <a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
-<a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-globe"></i> Project</a>
 
 :::
 
 ::::
 
 ::: {.callout-tip collapse="true" icon=false}
-## <i class="bi bi-chevron-expand"></i> Details, Figures & Tables
-
-放置该论文的详细介绍、方法图、消融实验表等。
 
 :::
 
