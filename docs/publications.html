@@ -180,10 +180,39 @@ ul.task-list li input[type="checkbox"] {
 <p>The proliferation of IoT devices has driven a rise in vulnerability exploits. Existing vulnerability detection approaches heavily rely on firmware or source code for analysis. This reliance critically compromises their efficiency in real-world black-box scenarios. To address this limitation, we propose IoTBec, a novel firmware and source-code independent framework for recurring vulnerability detection. IoTBec innovatively constructs a Vulner- ability Interface Signature (VIS) based on black-box interfaces and known vulnerability information. The signature is designed to match potential recurring vulnerabilities against target de- vices. The framework then deeply integrates this signature-based detection with Large Language Model (LLM)-driven fuzzing. Upon a match, IoTBec automatically leverages LLMs to generate targeted fuzzing payloads for verification.</p>
 <p>To evaluate IoTBec, we conducted extensive experiments on devices from five major IoT vendors. Results show that IoTBec discovers over 7 times more vulnerabilities than the current state-of-the-art (SOTA) black-box fuzzing methods, with 100% precision and 93.38% recall. Overall, IoTBec detected 183 vul- nerabilities, 169 of which were assigned CVE IDs. Among these, 53 were newly discovered and had an average CVSS 3.x score of 8.61, covering buffer overflows, command injection, and CSRF issues. Notably, through LLM-driven fuzzing, IoTBec also dis- covered 25 previously unknown vulnerabilities. The experimental evidence suggests that IoTBec’s unique firmware and source- code independent paradigm enhances detection efficiency and enables the discovery of novel and variant vulnerabilities. We will release the source code for IoTBec and the experiment data at https://github.com/IoTBec.</p>
 <p><strong>Method Overview</strong></p>
-<p><img src="images/papers/IoTBec.png" id="fig-iie-method" class="img-fluid" style="width:90.0%"> Figure 1. IoTBec Workflow</p>
-<p><img src="images/papers/IoTBec_2.png" id="fig-iie-method" class="img-fluid" style="width:90.0%"> Figure 2. Illustration of Vulnerability Signature Extraction with the Vulnerability Analyzer LLM</p>
-<p><img src="images/papers/IoTBec_3.png" id="fig-iie-method" class="img-fluid" style="width:90.0%"> Figure 3. Illustration of Interface Signature Extraction</p>
-<p><strong>Key Results</strong></p>
+<div id="fig-iie-method" class="quarto-float quarto-figure quarto-figure-center anchored" width="90%">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/papers/IoTBec.png" id="fig-iie-method" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1
+</figcaption>
+</figure>
+</div>
+<p>Figure 1. IoTBec Workflow</p>
+<div id="fig-iie-method" class="quarto-float quarto-figure quarto-figure-center anchored" width="90%">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/papers/IoTBec_2.png" id="fig-iie-method" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2
+</figcaption>
+</figure>
+</div>
+<p>Figure 2. Illustration of Vulnerability Signature Extraction with the Vulnerability Analyzer LLM</p>
+<div id="fig-iie-method" class="quarto-float quarto-figure quarto-figure-center anchored" width="90%">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/papers/IoTBec_3.png" id="fig-iie-method" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3
+</figcaption>
+</figure>
+</div>
+<p>Figure 3. Illustration of Interface Signature Extraction</p>
 </div>
 </div>
 </div>
