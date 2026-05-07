@@ -22,11 +22,7 @@ about:
 
 ## Welcome
 
-Hello, welcome to my personal page!
+Hello, welcome to my personal page! I'm Shuangning Yang, a master’s student in Artificial Intelligence at Anhui University, and I received my bachelor’s degree from Hefei University of Technology. I am interested in both securing AI systems and using AI to improve software security. Specifically, my research focuses on improving the reliability and robustness of LLM-based systems, while exploring how LLMs can support security tasks, such as vulnerability detection. 
 
-
-## Background
-
-- 2020-2024: Lecturer, HFUT
 
 :::
