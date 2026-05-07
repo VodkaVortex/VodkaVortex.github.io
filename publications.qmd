@@ -49,11 +49,14 @@ To evaluate IoTBec, we conducted extensive experiments on devices from five majo
 
 **Method Overview**
 
-![IoTBec Workflow](images/papers/IoTBec.png){#fig-iie-method width=90%}
+![](images/papers/IoTBec.png){#fig-iie-method width=90%}
+Figure 1. IoTBec Workflow
 
-![Illustration of Vulnerability Signature Extraction with the Vulnerability Analyzer LLM](images/papers/IoTBec_2.png){#fig-iie-method width=90%}
+![](images/papers/IoTBec_2.png){#fig-iie-method width=90%}
+Figure 2. Illustration of Vulnerability Signature Extraction with the Vulnerability Analyzer LLM
 
-![Illustration of Interface Signature Extraction](images/papers/IoTBec_3.png){#fig-iie-method width=90%}
+![](images/papers/IoTBec_3.png){#fig-iie-method width=90%}
+Figure 3. Illustration of Interface Signature Extraction
 
 **Key Results**
 
@@ -98,7 +101,8 @@ Knowledge distillation has significantly accelerated the devel- opment of effici
 
 **Method Overview**
 
-![Figure 1. Workflow](images/papers/KD.png){#fig-iie-method width=90%}
+![](images/papers/KD.png){#fig-iie-method width=90%}
+Figure 1. Workflow
 
 A demonstration of the general ablation-based pipeline, consisting of knowledge elicitation (from GPT-4) and knowledge 
 transfer via labeling, feedback (RO/RL), or their combination.
