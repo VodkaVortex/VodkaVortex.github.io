@@ -83,7 +83,7 @@ To evaluate IoTBec, we conducted extensive experiments on devices from five majo
 *ICASSP*, 2026 &nbsp;·&nbsp; **Accepted**
 
 <a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=11462247" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
-<a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
+<a href="https://github.com/VodkaVortex/JBB-harmlevel" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
 
 :::
 
@@ -147,7 +147,7 @@ Attack success rate (ASR) comparison across different distillation configuration
 *CSCWD*, 2026 &nbsp;·&nbsp; **Accepted**
 
 
-<a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+<a href="https://fyust.edu.cn/gjhyqk/cscwd2026/papers/paper_330.pdf" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
 <a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
 
 :::
