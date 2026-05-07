@@ -30,9 +30,8 @@ Click **Details** to view each paper’s methodology diagram, key findings, and 
 [**Third Author**]{.author-self}
 *NDSS*, 2026 &nbsp;·&nbsp; **Accepted**
 
-<a href="#" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
-<a href="#" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
-<a href="#" class="btn btn-outline-success btn-sm" role="button"><i class="bi bi-globe"></i> Project</a>
+<a href="https://www.ndss-symposium.org/wp-content/uploads/2026-f634-paper.pdf" class="btn btn-outline-primary btn-sm" role="button"><i class="bi bi-file-earmark-pdf"></i> PDF</a>
+<a href="https://github.com/IoTBec/code" class="btn btn-outline-secondary btn-sm" role="button"><i class="bi bi-github"></i> Code</a>
 
 :::
 
