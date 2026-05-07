@@ -186,7 +186,7 @@ ul.task-list li input[type="checkbox"] {
 <img src="images/papers/IoTBec.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;1: Figure 1. IoTBec Workflow
+Figure&nbsp;1: IoTBec Workflow
 </figcaption>
 </figure>
 </div>
@@ -196,7 +196,7 @@ Figure&nbsp;1: Figure 1. IoTBec Workflow
 <img src="images/papers/IoTBec_2.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;2: Figure 2. Illustration of Vulnerability Signature Extraction with the Vulnerability Analyzer LLM
+Figure&nbsp;2: Illustration of Vulnerability Signature Extraction with the Vulnerability Analyzer LLM
 </figcaption>
 </figure>
 </div>
@@ -206,7 +206,7 @@ Figure&nbsp;2: Figure 2. Illustration of Vulnerability Signature Extraction with
 <img src="images/papers/IoTBec_3.png" class="img-fluid figure-img" style="width:90.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-Figure&nbsp;3: Figure 3. Illustration of Interface Signature Extraction
+Figure&nbsp;3: Illustration of Interface Signature Extraction
 </figcaption>
 </figure>
 </div>
@@ -247,8 +247,17 @@ Figure&nbsp;3: Figure 3. Illustration of Interface Signature Extraction
 <p><strong>Abstract</strong></p>
 <p>Knowledge distillation has significantly accelerated the devel- opment of efficient language models. With the rapid prolif- eration of these methods in the open-source communities, a systematic evaluation of their implications for model security is urgently needed. To quantify the security risks introduced by various distillation methods, we propose a general and exten- sible evaluation framework that reflects complex, real-world distillation workflows. Additionally, we analyze the impact of the distillation process on models’ tendencies toward harm- ful behavior by extending JailbreakBench with a harm-level dataset comprising 10 malicious query categories. Our results demonstrate that knowledge distillation significantly increases model vulnerability, and joint learning of the two primary forms of knowledge further exacerbates this risk. Furthermore, our analysis reveals different effects across harmful query cat- egories, with the risk levels of discrimination and economic harm showing significant increases that warrant particular at- tention.</p>
 <p><strong>Method Overview</strong></p>
-<p>(images/papers/KD.png){#fig-iie-method width=90%}</p>
-<p>A demonstration of the general ablation-based pipeline, consisting of knowledge elicitation (from GPT-4) and knowl-edge transfer via labeling, feedback (RO/RL), or their combi- nation.</p>
+<div id="fig-iie-method" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="images/papers/KD.png" class="img-fluid figure-img" style="width:90.0%">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-iie-method-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Figure 1. Workflow
+</figcaption>
+</figure>
+</div>
+<p>A demonstration of the general ablation-based pipeline, consisting of knowledge elicitation (from GPT-4) and knowledge transfer via labeling, feedback (RO/RL), or their combination.</p>
 <p><strong>Key Results</strong></p>
 <table class="caption-top table">
 <colgroup>
