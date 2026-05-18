@@ -1,6 +1,6 @@
 ---
 title: "Shuangning Yang"
-image: images/yangshuangning.png
+image: images/Yangshuangning.png
 about:
   id: hero-heading
   template: trestles

@@ -6,7 +6,7 @@ website:
   page-navigation: true
   title: "Shuangning Yang"
   site-url: https://yangshuangning.github.io
-  favicon: images/site-logo.png
+  favicon: images/logo.png
   repo-url: https://github.com/yangshuangning/yangshuangning.github.io
   repo-actions: [edit, issue]
   
