@@ -1,0 +1,41 @@
+/* Article-only code presentation; keep diagram rendering independent. */
+#quarto-document-content .code-with-filename {
+  margin: 1.25rem 0 1.5rem;
+  border: 1px solid #dce3e8;
+  border-radius: 8px;
+  overflow: hidden;
+}
+#quarto-document-content .code-with-filename .code-with-filename-file {
+  padding: .55rem 1rem;
+  background: #edf2f6;
+  color: #405467;
+  border-bottom: 1px solid #dce3e8;
+  font-size: .85rem;
+}
+#quarto-document-content .code-with-filename .code-with-filename-file pre {
+  margin: 0;
+  color: inherit;
+  white-space: normal;
+}
+#quarto-document-content .code-with-filename div.sourceCode {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: #f7f9fb;
+}
+#quarto-document-content .code-with-filename pre.sourceCode,
+#quarto-document-content .code-with-filename > pre {
+  margin: 0;
+  padding: 1rem;
+  background: #f7f9fb;
+  overflow-x: auto;
+  line-height: 1.65;
+}
+#quarto-document-content .code-with-filename pre code {
+  padding: 0;
+  background: transparent;
+  color: #243746;
+  font-size: .9rem;
+  border-radius: 0;
+  white-space: pre;
+}

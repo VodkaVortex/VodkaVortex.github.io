@@ -1,0 +1,44 @@
+---
+title: "Agartha 渗透测试工具"
+lang: zh-CN
+toc-title: "目录"
+format:
+  html:
+    code-copy: true
+    code-overflow: scroll
+    css: ../decompilation/code-blocks.css
+---
+
+## Agartha
+
+Agartha 是一个渗透测试工具，通过创建动态有效载荷列表和用户访问矩阵，帮助发现注入缺陷以及身份验证、授权问题。
+
+虽然已有许多不同的攻击有效载荷，Agartha 仍尝试生成适用于不同运行时、操作系统和供应商环境的有效载荷，覆盖多种组合与绕过方式。它也关注用户会话与 URL 之间的关系，使访问权限违规更容易被发现。此外，它可以将 HTTP 请求转换为 JavaScript，辅助分析 XSS 问题。
+
+[GitHub · volkandindar/agartha](https://github.com/volkandindar/agartha)
+
+## 有效载荷生成器
+
+为不同类型的攻击生成有效载荷或字典列表。
+
+### 目录遍历与本地文件包含
+
+创建包含各种编码和转义字符的文件字典列表，用于目录遍历和本地文件包含问题的测试。
+
+### 远程代码执行
+
+为 Unix 和 Windows 环境创建具有不同组合的命令字典列表。
+
+### SQL 注入
+
+为多种数据库创建 SQL 注入词表，覆盖堆叠查询、基于布尔值、基于联合、基于时间和基于排序的测试方式，帮助发现漏洞。
+
+## 授权矩阵
+
+根据用户会话和 URL 列表创建访问角色矩阵，以识别与授权、身份验证相关的访问违规问题。
+
+## HTTP 请求转 JavaScript
+
+将 HTTP 请求转换为 JavaScript 代码，以便进一步分析和测试 XSS 等问题。
+
+[← 返回 Blogs](../../blogs.qmd)

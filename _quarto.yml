@@ -22,6 +22,8 @@ website:
         href: index.qmd
       - text: "Publications"
         href: publications.qmd
+      - text: "Blogs"
+        href: blogs.qmd
       - text: "Codes"
         href: codes.qmd
       - text: "CV"
