@@ -1,0 +1,14 @@
+---
+title: "DetFuzz"
+subtitle: "Manuscript"
+toc: false
+search: false
+---
+
+[<i class="bi bi-file-earmark-pdf"></i> PDF](DetFuzz.pdf){.btn .btn-outline-primary .btn-sm}
+
+## Motivation
+
+![DetFuzz motivation diagram](../../images/papers/DetFuzz.png){#fig-detfuzz-motivation width=100% style="background: white;"}
+
+[← Back to Papers](../../publications.qmd)

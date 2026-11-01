@@ -1,6 +1,8 @@
 project:
   type: website
   output-dir: docs
+  resources:
+    - "papers/**/*.pdf"
   
 website:
   page-navigation: true
@@ -20,7 +22,7 @@ website:
     right: 
       - text: "Home"
         href: index.qmd
-      - text: "Publications"
+      - text: "Papers"
         href: publications.qmd
       - text: "Blogs"
         href: blogs.qmd
