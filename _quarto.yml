@@ -22,7 +22,7 @@ website:
     right: 
       - text: "Home"
         href: index.qmd
-      - text: "Papers"
+      - text: "Publications"
         href: publications.qmd
       - text: "Blogs"
         href: blogs.qmd

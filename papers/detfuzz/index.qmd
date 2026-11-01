@@ -11,4 +11,4 @@ search: false
 
 ![DetFuzz motivation diagram](../../images/papers/DetFuzz.png){#fig-detfuzz-motivation width=100% style="background: white;"}
 
-[← Back to Papers](../../publications.qmd)
+[← Back to Publications](../../publications.qmd)
